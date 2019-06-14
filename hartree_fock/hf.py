@@ -18,12 +18,16 @@ class HartreeFock:
         self.mixer = mixer
         self.verbose = verbose
 
+        self.h = self.system.h
+        self.u = self.system.u
+        self.s = self.system.s
+
+        self.o = self.system.o
+
     def compute_initial_guess(self):
         # Compute initial guess from the one-body part of the Hamiltonian and
         # the overlap.
-        self._epsilon, self._C = self.diagonalize_roothan_hall(
-            self.system.h, self.system.s
-        )
+        self._epsilon, self._C = self.diagonalize_roothan_hall(self.h, self.s)
         self.density_matrix = self.build_density_matrix()
         self.fock_matrix = self.build_fock_matrix()
 
@@ -31,11 +35,11 @@ class HartreeFock:
         np = self.np
 
         # energy <- D_{ba} h_{ab}
-        energy = np.trace(np.dot(self.density_matrix, self.system.h))
+        energy = np.trace(np.dot(self.density_matrix, self.h))
 
         # term_{bd} = 0.5 * D_{ca} u^{ab}_{cd}
         term = 0.5 * np.tensordot(
-            self.density_matrix, self.system.u, axes=((0, 1), (2, 0))
+            self.density_matrix, self.u, axes=((0, 1), (2, 0))
         )
         # energy <- D_{db} term_{bd}
         energy += np.trace(np.dot(self.density_matrix, term))
@@ -44,16 +48,16 @@ class HartreeFock:
 
     def build_fock_matrix(self):
         return build_general_fock_matrix(
-            self.system.h, self.system.u, self.density_matrix, self.np
+            self.h, self.u, self.density_matrix, self.np
         )
 
     def build_error_vector(self):
         return compute_error_vector(
-            self.fock_matrix, self.density_matrix, self.system.s
+            self.fock_matrix, self.density_matrix, self.s
         )
 
     def build_density_matrix(self):
-        return build_density_matrix(self._C, self.system.o, self.np)
+        return build_density_matrix(self._C, self.o, self.np)
 
     def setup_mixer(self, **mixer_kwargs):
         self.fock_mixer = self.mixer(**mixer_kwargs)
@@ -63,7 +67,7 @@ class HartreeFock:
 
     def compute_scf_iteration(self):
         self._epsilon, self._C = self.diagonalize_roothan_hall(
-            self.fock_matrix, self.system.s
+            self.fock_matrix, self.s
         )
         self.density_matrix = self.build_density_matrix()
 
