@@ -27,7 +27,7 @@ class HartreeFock:
     def compute_initial_guess(self):
         # Compute initial guess from the one-body part of the Hamiltonian and
         # the overlap.
-        self._epsilon, self._C = self.diagonalize_roothan_hall(self.h, self.s)
+        self._epsilon, self._C = scipy.linalg.eigh(self.h, self.s)
         self.density_matrix = self.build_density_matrix()
         self.fock_matrix = self.build_fock_matrix()
 
@@ -62,13 +62,9 @@ class HartreeFock:
     def setup_mixer(self, **mixer_kwargs):
         self.fock_mixer = self.mixer(**mixer_kwargs)
 
-    def diagonalize_roothan_hall(self, fock_matrix, s):
-        return scipy.linalg.eigh(fock_matrix, s)
-
     def compute_scf_iteration(self):
-        self._epsilon, self._C = self.diagonalize_roothan_hall(
-            self.fock_matrix, self.s
-        )
+        # Solve the Roothan-Hall equations
+        self._epsilon, self._C = scipy.linalg.eigh(self.fock_matrix, self.s)
         self.density_matrix = self.build_density_matrix()
 
         trial_vector = self.fock_matrix
