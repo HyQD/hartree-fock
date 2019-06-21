@@ -8,6 +8,14 @@ def build_general_fock_matrix(h, u, density_matrix, np):
     return h + np.tensordot(density_matrix, u, axes=((0, 1), (3, 1)))
 
 
+def build_rhf_fock_matrix(h, u, density_matrix, np):
+    return (
+        h
+        + np.tensordot(density_matrix, u, axes=((0, 1), (3, 1)))
+        - 0.5 * np.tensordot(density_matrix, u, axes=((0, 1), (2, 1)))
+    )
+
+
 def compute_error_vector(fock_matrix, density_matrix, overlap):
     """Function computing the error vector for the DIIS extrapolation method.
     See http://sirius.chem.vt.edu/wiki/doku.php?id=crawdad:programming:project8
