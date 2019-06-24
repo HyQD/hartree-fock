@@ -9,24 +9,6 @@ from hartree_fock.hf_helper import (
 
 
 class UHF(HartreeFock):
-    def __init__(self, *args, num_up=None, **kwargs):
-        super().__init__(*args, **kwargs)
-
-        # Check if the user specified the number of occupied orbitals with
-        # spin-up
-        if num_up is None:
-            num_up = self.system.n // 2
-
-        assert (
-            0 <= num_up <= self.system.n
-        ), "The number of occupied orbitals for spin-up must be between [0, n]"
-
-        self.num_up = num_up
-        self.num_down = self.system.n - self.num_up
-
-        self.o_up = slice(0, self.num_up)
-        self.o_down = slice(0, self.num_down)
-
     def compute_energy(self):
         np = self.np
 
@@ -62,8 +44,8 @@ class UHF(HartreeFock):
     def build_density_matrix(self):
         C_up, C_down = self._C
 
-        D_up = build_density_matrix(C_up, self.o_up, self.np)
-        D_down = build_density_matrix(C_down, self.o_down, self.np)
+        D_up = build_density_matrix(C_up, self.system.o_up, self.np)
+        D_down = build_density_matrix(C_down, self.system.o_down, self.np)
 
         return (D_up, D_down)
 
