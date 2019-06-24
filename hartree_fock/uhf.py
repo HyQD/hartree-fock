@@ -44,7 +44,7 @@ class UHF(HartreeFock):
             np.dot(D_down, np.tensordot(D_down, self.u, axes=((0, 1), (2, 1))))
         )
 
-        return energy
+        return energy + self.system.nuclear_repulsion_energy
 
     def compute_initial_guess(self):
         # compute initial guess from the one-body part of the hamiltonian and

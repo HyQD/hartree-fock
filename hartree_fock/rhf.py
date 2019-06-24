@@ -33,4 +33,4 @@ class RHF(HartreeFock):
         # energy = D_{ba} term_{ab}
         energy = np.trace(np.dot(term, self.density_matrix))
 
-        return energy
+        return energy + self.system.nuclear_repulsion_energy

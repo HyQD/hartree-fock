@@ -44,7 +44,7 @@ class HartreeFock:
         # energy <- D_{db} term_{bd}
         energy += np.trace(np.dot(self.density_matrix, term))
 
-        return energy
+        return energy + self.system.nuclear_repulsion_energy
 
     def build_fock_matrix(self):
         return build_general_fock_matrix(
