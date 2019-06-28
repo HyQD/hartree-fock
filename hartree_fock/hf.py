@@ -85,6 +85,16 @@ class HartreeFock:
             trial_vector, direction_vector, error_vector
         )
 
+    def compute_density_residual(self, prev_density_matrix, density_matrix):
+        if not type(prev_density_matrix) in [list, tuple, set]:
+            prev_density_matrix = [prev_density_matrix]
+            density_matrix = [density_matrix]
+
+        return [
+            self.np.linalg.norm(d_prev - d)
+            for d_prev, d in zip(prev_density_matrix, density_matrix)
+        ]
+
     def compute_ground_state(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
     ):
@@ -93,26 +103,35 @@ class HartreeFock:
 
         self.setup_mixer(**mixer_kwargs)
         self.compute_initial_guess()
-        energy = self.compute_energy()
 
-        diff = 100
+        density_residual = [100]
 
         for i in range(max_iterations):
             if self.verbose:
                 print(
                     f"{self.__class__.__name__} energy: "
-                    + f"{energy} @ iteration: {i}"
+                    + f"{self.compute_energy()} @ iteration: {i}\t"
+                    + f"residual: {density_residual}"
                 )
 
-            if diff < tol:
+            if all(d_residual < tol for d_residual in density_residual):
                 break
 
+            self.prev_density_matrix = self.density_matrix
             self.compute_scf_iteration()
 
-            energy_prev = energy
-            energy = self.compute_energy()
+            density_residual = self.compute_density_residual(
+                self.prev_density_matrix, self.density_matrix
+            )
 
-            diff = abs(energy - energy_prev)
+        self._epsilon, self._C = self.diagonalize(self.fock_matrix, self.s)
+        self.density_matrix = self.build_density_matrix()
+        if self.verbose:
+            print(
+                f"Final {self.__class__.__name__} energy: "
+                + f"{self.compute_energy()} @ iteration: {i}\t"
+                + f"residual: {density_residual}"
+            )
 
     @property
     def C(self):
