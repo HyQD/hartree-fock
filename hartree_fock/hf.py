@@ -52,13 +52,19 @@ class HartreeFock:
 
         rho_qp = np.ones(self.system.l)
         rho_qp[self.system.n :] = 0
+        rho_qp = np.diag(rho_qp)
 
-        return np.diag(rho_qp)
+        assert abs(np.trace(rho_qp) - self.system.n) < 1e-10
+
+        return rho_qp
 
     def compute_particle_density(self):
-        rho_qp = self.compute_one_body_density_matrix()
+        np = self.np
 
-        return compute_particle_density(rho_qp, self.system.spf, self.np)
+        rho_qp = self.compute_one_body_density_matrix()
+        spf = np.tensordot(self.C, self.system.spf, axes=((0), (0)))
+
+        return compute_particle_density(rho_qp, spf, self.np)
 
     def build_fock_matrix(self):
         return build_general_fock_matrix(
