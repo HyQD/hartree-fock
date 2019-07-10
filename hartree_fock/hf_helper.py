@@ -42,3 +42,14 @@ def compute_error_vector(fock_matrix, density_matrix, overlap):
     error_vector -= overlap @ density_matrix @ fock_matrix
 
     return error_vector
+
+
+def compute_particle_density(rho_qp, spf, np):
+    rho = np.zeros(spf.shape[1:], dtype=spf.dtype)
+    spf_slice = slice(0, spf.shape[0])
+
+    for _i in np.ndindex(rho.shape):
+        i = (spf_slice, *_i)
+        rho[_i] += np.dot(spf[i].conj(), np.dot(rho_qp, spf[i]))
+
+    return rho
