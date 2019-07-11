@@ -1,5 +1,3 @@
-import psi4
-import pyscf
 from hartree_fock import UHF
 from hartree_fock.mix import DIIS, AlphaMixer
 from quantum_systems import (
@@ -10,6 +8,8 @@ from quantum_systems import (
 
 
 def get_pysf_uhf_energy(molecule, basis="ccpvdz", **kwargs):
+    import pyscf
+
     mol = pyscf.gto.Mole()
     mol.build(atom=molecule, basis=basis, **kwargs)
 
@@ -19,6 +19,8 @@ def get_pysf_uhf_energy(molecule, basis="ccpvdz", **kwargs):
 
 
 def get_psi4_uhf_energy(molecule, options):
+    import psi4
+
     psi4.core.be_quiet()
 
     if "reference" not in options:
