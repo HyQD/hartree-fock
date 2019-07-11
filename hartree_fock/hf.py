@@ -5,6 +5,7 @@ from hartree_fock.hf_helper import (
     build_general_fock_matrix,
     compute_error_vector,
     compute_particle_density,
+    compute_general_hf_energy,
 )
 from hartree_fock.mix import EmptyMixer
 
@@ -33,19 +34,13 @@ class HartreeFock:
         self.fock_matrix = self.build_fock_matrix()
 
     def compute_energy(self):
-        np = self.np
-
-        # energy <- D_{ba} h_{ab}
-        energy = np.trace(np.dot(self.density_matrix, self.h))
-
-        # term_{bd} = 0.5 * D_{ca} u^{ab}_{cd}
-        term = 0.5 * np.tensordot(
-            self.density_matrix, self.u, axes=((0, 1), (2, 0))
+        return compute_general_hf_energy(
+            self.density_matrix,
+            self.h,
+            self.u,
+            self.system.nuclear_repulsion_energy,
+            self.np,
         )
-        # energy <- D_{db} term_{bd}
-        energy += np.trace(np.dot(self.density_matrix, term))
-
-        return energy + self.system.nuclear_repulsion_energy
 
     def compute_one_body_density_matrix(self):
         np = self.np

@@ -53,3 +53,26 @@ def compute_particle_density(rho_qp, spf, np):
         rho[_i] += np.dot(spf[i].conj(), np.dot(rho_qp, spf[i]))
 
     return rho
+
+
+def create_orthogonalizer(overlap_matrix, np):
+    # Equation 3.166 Szabo-Ostlund
+    s, U = np.linalg.eigh(overlap_matrix)
+    # Equation 3.167 Szabo-Ostlund
+    X = np.dot(U / np.sqrt(s), np.conj(U).T)
+
+    return X
+
+
+def compute_general_hf_energy(
+    density_matrix, h, u, nuclear_repulsion_energy, np
+):
+    # energy <- D_{ba} h_{ab}
+    energy = np.trace(np.dot(density_matrix, h))
+
+    # term_{bd} = 0.5 * D_{ca} u^{ab}_{cd}
+    term = 0.5 * np.tensordot(density_matrix, u, axes=((0, 1), (2, 0)))
+    # energy <- D_{db} term_{bd}
+    energy += np.trace(np.dot(density_matrix, term))
+
+    return energy + nuclear_repulsion_energy
