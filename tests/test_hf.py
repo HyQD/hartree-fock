@@ -15,13 +15,55 @@ def test_tdho_hf():
 
     hf = HartreeFock(tdho, verbose=True)
 
-    hf.compute_ground_state(tol=1e-10)
+    hf.compute_ground_state(tol=1e-10)  # , num_vecs=20, max_iterations=1000)
 
     assert abs(hf.compute_energy() - 3.162691) < 1e-6
 
-    rho_qp = hf.compute_one_body_density_matrix()
+    for i in range(l):
+        C_i = hf.C[:, i]
+        for j in range(i + 1, l):
+            C_j = hf.C[:, j]
 
-    np.testing.assert_allclose(rho_qp[tdho.o, tdho.o], np.identity(n))
-    np.testing.assert_allclose(rho_qp[tdho.v, tdho.v], np.zeros((l - n, l - n)))
+            assert abs(C_i.conj() @ C_j) < 1e-8
+
+    rho_qp = hf.compute_one_body_density_matrix()
+    assert abs(np.trace(rho_qp) - n) < 1e-8
 
     rho = hf.compute_particle_density()
+
+
+def test_h2_hf():
+    from quantum_systems import construct_pyscf_system_ao
+
+    molecule = f"h 0.0 0.0 -0.69485; h 0.0 0.0 0.69485"
+    basis = "6-311++Gss"
+
+    system = construct_pyscf_system_ao(molecule, basis=basis)
+
+    hf = HartreeFock(system, verbose=True)
+    hf.compute_ground_state(tol=1e-10, change_system_basis=True)
+
+    assert abs(hf.compute_energy() - (-1.1322)) < 1e-3
+
+    n = system.n
+    l = system.l
+
+    for i in range(l):
+        C_i = hf.C[:, i]
+        for j in range(i + 1, l):
+            C_j = hf.C[:, j]
+
+            assert abs(C_i.conj().T @ system.s @ C_j) < 1e-8, f"({i}, {j})"
+
+    rho_qp = hf.compute_one_body_density_matrix()
+
+    assert abs(np.trace(rho_qp) - n) < 1e-8
+
+    np.testing.assert_allclose(
+        rho_qp[system.o, system.o], np.identity(n), atol=1e-10
+    )
+    np.testing.assert_allclose(
+        rho_qp[system.v, system.v],
+        np.zeros((l - n, l - n), dtype=np.complex128),
+        atol=1e-10,
+    )
