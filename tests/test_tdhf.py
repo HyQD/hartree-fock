@@ -59,4 +59,4 @@ def test_tdhf():
         os.path.join("tests", "dat", "overlap_tdhf_real.dat")
     )
 
-    np.testing.assert_allclose(overlap.real, test_overlap[:, 1])
+    np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-6)
