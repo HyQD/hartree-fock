@@ -1,3 +1,5 @@
+import warnings
+
 from hartree_fock import HartreeFock
 from hartree_fock.integrators import RungeKutta4
 from hartree_fock.hf_helper import (
@@ -47,13 +49,18 @@ class TDHF:
         )
 
     def compute_ground_state(self, *args, **kwargs):
+        if "change_system_basis" not in kwargs:
+            kwargs["change_system_basis"] = True
+
         self.hf.compute_ground_state(*args, **kwargs)
 
-        if self.verbose:
-            print(f"Changing to {self.hf.__class__.__name__} basis")
-
-        # Change to Hartree-Fock basis so that we get an orthonormal basis
-        self.system.change_basis(self.hf.C)
+        # Make sure that we have an orthonormal basis
+        if not self.np.allclose(self.system.s, self.np.identity(self.system.l)):
+            warnings.warn(
+                f"Ground state basis is not orthonormal. "
+                + f"The {self.__class__.name} assumes an orthonormal "
+                + f"spin-orbital basis"
+            )
 
     def set_initial_conditions(self, C=None):
         if C is None:

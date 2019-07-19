@@ -101,7 +101,11 @@ class HartreeFock:
         ]
 
     def compute_ground_state(
-        self, max_iterations=100, tol=1e-4, **mixer_kwargs
+        self,
+        max_iterations=100,
+        tol=1e-4,
+        change_system_basis=False,
+        **mixer_kwargs,
     ):
         if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = self.np
@@ -140,6 +144,18 @@ class HartreeFock:
                 + f"{self.compute_energy()} @ iteration: {i}\t"
                 + f"residual: {density_residual}"
             )
+
+        if change_system_basis:
+            self.change_basis()
+
+    def change_basis(self):
+        if self.verbose:
+            print(f"Changing to {self.__class__.__name__} basis")
+
+        self.system.change_basis(self._C)
+        self._C = self.np.identity(self.system.l)
+        self.density_matrix = self.build_density_matrix()
+        self.fock_matrix = self.build_fock_matrix()
 
     @property
     def C(self):
