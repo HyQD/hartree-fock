@@ -39,15 +39,7 @@ class HartreeFock:
         )
 
     def compute_one_body_density_matrix(self):
-        np = self.np
-
-        rho_qp = np.ones(self.system.l)
-        rho_qp[self.system.n :] = 0
-        rho_qp = np.diag(rho_qp)
-
-        assert abs(np.trace(rho_qp) - self.system.n) < 1e-10
-
-        return rho_qp
+        return build_density_matrix(self._C, self.o, self.np)
 
     def compute_particle_density(self):
         np = self.np

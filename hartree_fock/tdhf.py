@@ -85,9 +85,7 @@ class TDHF:
         return self._C
 
     def compute_one_body_density_matrix(self):
-        # TODO: Check if this is correct, i.e., that the one-body density
-        # matrix stays the same in time.
-        return self.hf.compute_one_body_density_matrix()
+        return build_density_matrix(self._C, self.o, self.np)
 
     def compute_particle_density(self):
         rho_qp = self.compute_one_body_density_matrix()
