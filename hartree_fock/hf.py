@@ -20,24 +20,20 @@ class HartreeFock:
         self.mixer = mixer
         self.verbose = verbose
 
-        self.h = self.system.h
-        self.u = self.system.u
-        self.s = self.system.s
-
         self.o = self.system.o
 
     def compute_initial_guess(self):
         # compute initial guess from the one-body part of the hamiltonian and
         # the overlap.
-        self._epsilon, self._C = self.diagonalize(self.h, self.s)
+        self._epsilon, self._C = self.diagonalize(self.system.h, self.system.s)
         self.density_matrix = self.build_density_matrix()
         self.fock_matrix = self.build_fock_matrix()
 
     def compute_energy(self):
         return compute_general_hf_energy(
             self.density_matrix,
-            self.h,
-            self.u,
+            self.system.h,
+            self.system.u,
             self.system.nuclear_repulsion_energy,
             self.np,
         )
@@ -63,12 +59,12 @@ class HartreeFock:
 
     def build_fock_matrix(self):
         return build_general_fock_matrix(
-            self.h, self.u, self.density_matrix, self.np
+            self.system.h, self.system.u, self.density_matrix, self.np
         )
 
     def build_error_vector(self):
         return compute_error_vector(
-            self.fock_matrix, self.density_matrix, self.s
+            self.fock_matrix, self.density_matrix, self.system.s
         )
 
     def build_density_matrix(self):
@@ -82,7 +78,9 @@ class HartreeFock:
 
     def compute_scf_iteration(self):
         # Solve the Roothan-Hall equations
-        self._epsilon, self._C = self.diagonalize(self.fock_matrix, self.s)
+        self._epsilon, self._C = self.diagonalize(
+            self.fock_matrix, self.system.s
+        )
         self.density_matrix = self.build_density_matrix()
 
         trial_vector = self.fock_matrix
@@ -139,8 +137,11 @@ class HartreeFock:
                 self.prev_density_matrix, self.density_matrix
             )
 
-        self._epsilon, self._C = self.diagonalize(self.fock_matrix, self.s)
+        self._epsilon, self._C = self.diagonalize(
+            self.fock_matrix, self.system.s
+        )
         self.density_matrix = self.build_density_matrix()
+
         if self.verbose:
             print(
                 f"Final {self.__class__.__name__} energy: "

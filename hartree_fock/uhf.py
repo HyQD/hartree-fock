@@ -15,15 +15,22 @@ class UHF(HartreeFock):
         D_up, D_down = self.density_matrix
         D_sum = D_up + D_down
 
-        energy = np.trace(np.dot(D_sum, self.h))
+        energy = np.trace(np.dot(D_sum, self.system.h))
         energy += 0.5 * np.trace(
-            np.dot(D_sum, np.tensordot(D_sum, self.u, axes=((0, 1), (3, 1))))
+            np.dot(
+                D_sum, np.tensordot(D_sum, self.system.u, axes=((0, 1), (3, 1)))
+            )
         )
         energy -= 0.5 * np.trace(
-            np.dot(D_up, np.tensordot(D_up, self.u, axes=((0, 1), (2, 1))))
+            np.dot(
+                D_up, np.tensordot(D_up, self.system.u, axes=((0, 1), (2, 1)))
+            )
         )
         energy -= 0.5 * np.trace(
-            np.dot(D_down, np.tensordot(D_down, self.u, axes=((0, 1), (2, 1))))
+            np.dot(
+                D_down,
+                np.tensordot(D_down, self.system.u, axes=((0, 1), (2, 1))),
+            )
         )
 
         return energy + self.system.nuclear_repulsion_energy
@@ -31,7 +38,9 @@ class UHF(HartreeFock):
     def compute_initial_guess(self):
         # compute initial guess from the one-body part of the hamiltonian and
         # the overlap.
-        self._epsilon, self._C = self.diagonalize((self.h, self.h), self.s)
+        self._epsilon, self._C = self.diagonalize(
+            (self.system.h, self.system.h), self.system.s
+        )
         self.density_matrix = self.build_density_matrix()
         self.fock_matrix = self.build_fock_matrix()
 
@@ -51,7 +60,7 @@ class UHF(HartreeFock):
 
     def build_fock_matrix(self):
         return build_uhf_fock_matrices(
-            self.h, self.u, self.density_matrix, self.np
+            self.system.h, self.system.u, self.density_matrix, self.np
         )
 
     def setup_mixer(self, **mixer_kwargs):
@@ -60,10 +69,10 @@ class UHF(HartreeFock):
 
     def build_error_vector(self):
         error_up = compute_error_vector(
-            self.fock_matrix[0], self.density_matrix[0], self.s
+            self.fock_matrix[0], self.density_matrix[0], self.system.s
         )
         error_down = compute_error_vector(
-            self.fock_matrix[1], self.density_matrix[1], self.s
+            self.fock_matrix[1], self.density_matrix[1], self.system.s
         )
 
         return error_up, error_down
