@@ -3,7 +3,8 @@ import numpy as np
 
 from hartree_fock import TDHF
 from hartree_fock.integrators import GaussIntegrator
-from quantum_systems import OneDimensionalHarmonicOscillator
+from quantum_systems import ODQD
+from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
 from quantum_systems.time_evolution_operators import LaserField
 
 
@@ -11,7 +12,6 @@ def test_tdhf():
     n = 2
     l = 20
 
-    mass = 1
     omega = 0.25
     grid_length = 10
     num_grid_points = 801
@@ -22,17 +22,15 @@ def test_tdhf():
     E = 1
     laser_pulse = lambda t: E * np.sin(laser_frequency * t)
 
-    odho = OneDimensionalHarmonicOscillator(
+    odho = ODQD(
         n,
         l,
         grid_length=grid_length,
         num_grid_points=num_grid_points,
-        omega=omega,
-        mass=mass,
         a=a,
         alpha=alpha,
     )
-    odho.setup_system()
+    odho.setup_system(potential=HOPotential(omega=omega))
     odho.set_time_evolution_operator(LaserField(laser_pulse))
 
     integrator = GaussIntegrator(s=3, eps=1e-6, np=np)
