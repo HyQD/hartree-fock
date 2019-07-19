@@ -41,7 +41,7 @@ def test_tdhf():
     rho_tdhf = tdhf.compute_particle_density()
     test_rho = np.loadtxt(os.path.join("tests", "dat", "rho_tdhf_real.dat"))
 
-    np.testing.assert_allclose(rho_tdhf.real, test_rho[:, 1])
+    np.testing.assert_allclose(rho_tdhf.real, test_rho[:, 1], atol=1e-6)
 
     t_start = 0
     t_end = 4 * 2 * np.pi / laser_frequency
