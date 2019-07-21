@@ -1,5 +1,3 @@
-import warnings
-
 import scipy.linalg
 
 from hartree_fock.hf_helper import (
@@ -140,15 +138,16 @@ class HartreeFock:
         )
         self.density_matrix = self.build_density_matrix()
 
-        if i == max_iterations - 1:
-            warnings.warn(f"{self.__class__.__name__} solver did not converge.")
-
         if self.verbose:
             print(
                 f"Final {self.__class__.__name__} energy: "
                 + f"{self.compute_energy()} @ iteration: {i}\t"
                 + f"residual: {density_residual}"
             )
+
+        assert (
+            i < max_iterations - 1
+        ), f"{self.__class__.__name__} solver did not converge."
 
         if change_system_basis:
             self.change_basis()
