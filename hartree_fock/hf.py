@@ -113,17 +113,22 @@ class HartreeFock:
         self.setup_mixer(**mixer_kwargs)
         self.compute_initial_guess()
 
+        energy_residual = 100
         density_residual = [100]
 
         for i in range(max_iterations):
+            energy = self.compute_energy()
             if self.verbose:
                 print(
                     f"{self.__class__.__name__} energy: "
-                    + f"{self.compute_energy()} @ iteration: {i}\t"
+                    + f"{energy} @ iteration: {i}\t"
                     + f"residual: {density_residual}"
                 )
 
-            if all(d_residual < tol for d_residual in density_residual):
+            if (
+                all(d_residual < tol for d_residual in density_residual)
+                and energy_residual < tol
+            ):
                 break
 
             self.prev_density_matrix = self.density_matrix
@@ -132,6 +137,7 @@ class HartreeFock:
             density_residual = self.compute_density_residual(
                 self.prev_density_matrix, self.density_matrix
             )
+            energy_residual = abs(self.compute_energy() - energy)
 
         self._epsilon, self._C = self.diagonalize(
             self.fock_matrix, self.system.s
