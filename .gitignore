@@ -109,3 +109,6 @@ miniconda.sh
 # Psi4 output
 timer.dat
 *.clean
+
+# Pipenv lock
+Pipfile.lock
