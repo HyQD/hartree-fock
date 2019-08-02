@@ -17,6 +17,8 @@ matplotlib = "*"
 black = "==19.3b0"
 quantum-systems = {editable = true,git = "https://github.com/Schoyen/quantum-systems.git"}
 pyscf = "*"
+sphinx = "*"
+sphinx-rtd-theme = "*"
 
 [requires]
 python_version = "3.6"
