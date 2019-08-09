@@ -7,8 +7,12 @@ Welcome to Hartree-Fock's documentation!
 ========================================
 
 .. toctree::
-   :maxdepth: 2
-   :caption: Contents:
+    :maxdepth: 2
+    :caption: Contents:
+
+    getting_started
+    ground_state
+    time_evolution
 
 
 
