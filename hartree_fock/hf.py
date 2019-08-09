@@ -148,9 +148,9 @@ class HartreeFock:
 
         energy_residual = 100
         density_residual = [100]
+        energy = self.compute_energy()
 
         for i in range(max_iterations):
-            energy = self.compute_energy()
             if self.verbose:
                 print(
                     f"{self.__class__.__name__} energy: "
@@ -170,7 +170,11 @@ class HartreeFock:
             density_residual = self.compute_density_residual(
                 self.prev_density_matrix, self.density_matrix
             )
-            energy_residual = abs(self.compute_energy() - energy)
+
+            energy_prev = energy
+            energy = self.compute_energy()
+
+            energy_residual = abs(energy - energy_prev)
 
         self._epsilon, self._C = self.diagonalize(
             self.fock_matrix, self.system.s
