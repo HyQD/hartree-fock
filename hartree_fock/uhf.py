@@ -36,6 +36,8 @@ class UHF(HartreeFock):
         return energy + self.system.nuclear_repulsion_energy
 
     def compute_initial_guess(self):
+        """Bleh
+        """
         # compute initial guess from the one-body part of the hamiltonian and
         # the overlap.
         self._epsilon, self._C = self.diagonalize(

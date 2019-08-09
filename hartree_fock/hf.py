@@ -11,6 +11,22 @@ from hartree_fock.mix import EmptyMixer
 
 
 class HartreeFock:
+    """Class implementing a Hartree-Fock solver using general spin-orbitals.
+
+    Parameters
+    ----------
+    system : QuantumSystem
+        System containing matrix elements needed by the solver.
+    mixer : Mixer
+        Convergence mixer for the self-consistent field procedure. Default is
+        ``EmptyMixer`` which does no mixing. This is enough in many cases.
+    verbose : bool
+        Variable to toggle the output of convergence info and converged energy.
+        Default is ``False``, i.e., quiet-mode.
+    np : module
+        Matrix library, default is ``None`` which imports ``numpy``.
+    """
+
     def __init__(self, system, mixer=EmptyMixer, verbose=False, np=None):
         if np is None:
             import numpy as np
@@ -23,6 +39,23 @@ class HartreeFock:
         self.o = self.system.o
 
     def compute_initial_guess(self):
+        r"""Compute initial guess for the self-consistent field procedure using
+        the one-body Hamiltonian as the initial Fock matrix and solving the
+        Roothan-Hall equations.
+        That is, the function solves the generalized eigenvalue equation
+
+        .. math:: \boldsymbol{h}\boldsymbol{C}
+            = \boldsymbol{S}\boldsymbol{C}\boldsymbol{\epsilon},
+
+        where :math:`\boldsymbol{h}` is the one-body Hamiltonian,
+        :math:`\boldsymbol{C}` the coefficient matrix as the eigenvectors,
+        :math:`\boldsymbol{S}` the overlap matrix from the system, and
+        :math:`\boldsymbol{\epsilon} = \text{diag}(\epsilon_1, \dots)` the
+        diagonal matrix with the eigenvalues from the one-body Hamiltonian.
+        The function proceeds by building and storing the density matrix
+        :math:`\boldsymbol{D}` from the coefficient matrices, and the initial
+        Fock matrix :math:`\boldsymbol{F}`.
+        """
         # compute initial guess from the one-body part of the hamiltonian and
         # the overlap.
         self._epsilon, self._C = self.diagonalize(self.system.h, self.system.s)
