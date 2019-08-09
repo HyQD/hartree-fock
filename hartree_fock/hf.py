@@ -72,7 +72,36 @@ class HartreeFock:
         )
 
     def compute_one_body_density_matrix(self):
-        return build_density_matrix(self._C, self.o, self.np)
+        r"""Compute the one-body density matrix from the occupied coefficient
+        matrix. This is done by
+
+        .. math:: \rho^{q}_{p} = \langle\Phi\rvert
+                \hat{c}^{\dagger}_{p} \hat{c}_{q}
+            \lvert\Phi\rangle
+            = \delta_{p \in o}
+            C^{*}_{\alpha p} s_{\alpha \beta} C_{\beta q},
+
+        where :math:`\delta_{p \in o}` denotes occupied indices :math:`o = {1,
+        \dots, N}`, :math:`s_{\alpha\beta}` are the overlap integrals of the
+        atomic orbitals, and :math:`C_{\alpha p}` the coefficient matrix. In
+        case of converged self consistent iterations, the one-body density
+        matrix should yield the identity along the occupied indices and zero
+        elsewhere.
+
+        Returns
+        -------
+        np.ndarray
+            The one-body density matrix :math:`\rho^{q}_{p}`.
+        """
+
+        np = self.np
+
+        o = self.system.o
+
+        rho_qp = np.zeros_like(self.system.h)
+        rho_qp[o, o] = self._C[:, o].conj().T @ self.system.s @ self._C[:, o]
+
+        return rho_qp
 
     def compute_particle_density(self):
         np = self.np

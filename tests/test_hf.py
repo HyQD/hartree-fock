@@ -29,6 +29,10 @@ def test_tdho_hf():
     rho_qp = hf.compute_one_body_density_matrix()
     assert abs(np.trace(rho_qp) - n) < 1e-8
 
+    np.testing.assert_allclose(
+        rho_qp, np.diag(np.append(np.ones(n), np.zeros(l - n))), atol=1e-14
+    )
+
     rho = hf.compute_particle_density()
 
 
