@@ -178,6 +178,86 @@ Default is <code class="docutils literal notranslate"><span class="pre">False</s
 </dd>
 </dl>
 <dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.change_basis">
+<code class="sig-name descname">change_basis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.change_basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function changing the system basis to the Hartree-Fock basis.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.compute_density_residual">
+<code class="sig-name descname">compute_density_residual</code><span class="sig-paren">(</span><em class="sig-param">prev_density_matrix</em>, <em class="sig-param">density_matrix</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.compute_density_residual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function computing the residual of the density matrices for the
+convergence test of the self consistent field procedure. That is,</p>
+<div class="math notranslate nohighlight">
+\[\rvert\rvert \Delta \mathbf{D} \lvert\lvert_{F}
+= \rvert\rvert
+    \mathbf{D}^{(i + 1)} - \mathbf{D}^{(i)}
+\lvert\lvert_{F}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{D}^{(i)}\)</span> is the density matrix at iteration
+<span class="math notranslate nohighlight">\(i\)</span> of the self consistent procedure.</p>
+<p>Note that this function works for both single density matrices, and a
+list of density matrices. This lets the <code class="docutils literal notranslate"><span class="pre">UHF</span></code>-class reuse this
+procedure.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prev_density_matrix</strong> (<em>np.ndarray</em><em>, </em><em>list</em>) – The density matrices at the previous timestep <span class="math notranslate nohighlight">\(i\)</span>.</p></li>
+<li><p><strong>density_matrix</strong> (<em>np.ndarray</em><em>, </em><em>list</em>) – Density matrices at the current timestep <span class="math notranslate nohighlight">\(i + 1\)</span>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The residuals from given density matrices.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute general Hartree-Fock energy, given by</p>
+<div class="math notranslate nohighlight">
+\[E = D_{\beta \alpha} h_{\alpha \beta}
++ \frac{1}{2} D_{\gamma\alpha} D_{\delta\beta}
+u^{\alpha\beta}_{\gamma\delta},\]</div>
+<p>where <span class="math notranslate nohighlight">\(D_{\beta\alpha}\)</span> are the matrix elements of the density
+matrix, <span class="math notranslate nohighlight">\(h_{\alpha\beta}\)</span> the one-body Hamiltonian matrix
+elements of the atomic orbitals, and
+<span class="math notranslate nohighlight">\(u^{\alpha\beta}_{\gamma\delta}\)</span> the antisymmetric two-body
+Hamiltonian matrix elements of the atomic orbitals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The Hartree-Fock energy for general spin-orbitals.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.compute_ground_state">
+<code class="sig-name descname">compute_ground_state</code><span class="sig-paren">(</span><em class="sig-param">max_iterations=100</em>, <em class="sig-param">tol=0.0001</em>, <em class="sig-param">change_system_basis=False</em>, <em class="sig-param">**mixer_kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.compute_ground_state" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the Hartree-Fock ground state using self consistent field
+iterations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>max_iterations</strong> (<em>int</em>) – The maximum number of self consistent iterations. Default is
+<code class="docutils literal notranslate"><span class="pre">100</span></code>.</p></li>
+<li><p><strong>tol</strong> (<em>float</em>) – The convergence tolerance for the energy and density residuals.
+Default is <code class="docutils literal notranslate"><span class="pre">1e-4</span></code>.</p></li>
+<li><p><strong>change_system_basis</strong> (<em>bool</em>) – Toggle whether or not to change to the Hartree-Fock basis after the
+self consistent iterations have converged.</p></li>
+<li><p><strong>**mixer_kwargs</strong> (<em>dict</em>) – Keyword arguments to the Fock matrix mixer class.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="hartree_fock.hf.HartreeFock.compute_initial_guess">
 <code class="sig-name descname">compute_initial_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.compute_initial_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Compute initial guess for the self-consistent field procedure using
@@ -193,8 +273,58 @@ That is, the function solves the generalized eigenvalue equation</p>
 <span class="math notranslate nohighlight">\(\boldsymbol{\epsilon} = \text{diag}(\epsilon_1, \dots)\)</span> the
 diagonal matrix with the eigenvalues from the one-body Hamiltonian.
 The function proceeds by building and storing the density matrix
-<span class="math notranslate nohighlight">\(\boldsymbol{D}\)</span> from the coefficient matrices, and the initial
+<span class="math notranslate nohighlight">\(\boldsymbol{D}\)</span> from the coefficient matrix, and the initial
 Fock matrix <span class="math notranslate nohighlight">\(\boldsymbol{F}\)</span>.</p>
+<p>Note that this function is called internally by the
+<code class="docutils literal notranslate"><span class="pre">compute_ground_state</span></code>-function.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the one-body density matrix from the occupied coefficient
+matrix. This is done by</p>
+<div class="math notranslate nohighlight">
+\[\rho^{q}_{p} = \langle\Phi\rvert
+    \hat{c}^{\dagger}_{p} \hat{c}_{q}
+\lvert\Phi\rangle
+= \delta_{p \in o}
+C^{*}_{\alpha p} s_{\alpha \beta} C_{\beta q},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\delta_{p \in o}\)</span> denotes occupied indices <span class="math notranslate nohighlight">\(o = {1,
+\dots, N}\)</span>, <span class="math notranslate nohighlight">\(s_{\alpha\beta}\)</span> are the overlap integrals of the
+atomic orbitals, and <span class="math notranslate nohighlight">\(C_{\alpha p}\)</span> the coefficient matrix. In
+case of converged self consistent iterations, the one-body density
+matrix should yield the identity along the occupied indices and zero
+elsewhere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The one-body density matrix <span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.compute_particle_density">
+<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function computing the particle density <span class="math notranslate nohighlight">\(\rho(x)\)</span> defined
+by</p>
+<div class="math notranslate nohighlight">
+\[\rho(x) = \phi^{*}_{q}(x) \rho^{q}_{p} \phi_{p}(x),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\phi_p(x)\)</span> are the single-particle functions,
+<span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span> the one-body density matrix, and <span class="math notranslate nohighlight">\(x\)</span> some
+coordinate space. Note the use of the Einstein summation convention in
+the above expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Particle density on the same grid as the single-particle functions.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
@@ -202,12 +332,58 @@ Fock matrix <span class="math notranslate nohighlight">\(\boldsymbol{F}\)</span>
 <dl class="class">
 <dt id="hartree_fock.rhf.RHF">
 <em class="property">class </em><code class="sig-prename descclassname">hartree_fock.rhf.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<dd><dl class="method">
+<dt id="hartree_fock.rhf.RHF.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute general Hartree-Fock energy, given by</p>
+<div class="math notranslate nohighlight">
+\[E = D_{\beta \alpha} h_{\alpha \beta}
++ \frac{1}{2} D_{\gamma\alpha} D_{\delta\beta}
+u^{\alpha\beta}_{\gamma\delta},\]</div>
+<p>where <span class="math notranslate nohighlight">\(D_{\beta\alpha}\)</span> are the matrix elements of the density
+matrix, <span class="math notranslate nohighlight">\(h_{\alpha\beta}\)</span> the one-body Hamiltonian matrix
+elements of the atomic orbitals, and
+<span class="math notranslate nohighlight">\(u^{\alpha\beta}_{\gamma\delta}\)</span> the antisymmetric two-body
+Hamiltonian matrix elements of the atomic orbitals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The Hartree-Fock energy for general spin-orbitals.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
 
 <dl class="class">
 <dt id="hartree_fock.uhf.UHF">
 <em class="property">class </em><code class="sig-prename descclassname">hartree_fock.uhf.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'hartree_fock.mix.EmptyMixer'&gt;</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">np=None</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
+<dt id="hartree_fock.uhf.UHF.compute_energy">
+<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_energy" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute general Hartree-Fock energy, given by</p>
+<div class="math notranslate nohighlight">
+\[E = D_{\beta \alpha} h_{\alpha \beta}
++ \frac{1}{2} D_{\gamma\alpha} D_{\delta\beta}
+u^{\alpha\beta}_{\gamma\delta},\]</div>
+<p>where <span class="math notranslate nohighlight">\(D_{\beta\alpha}\)</span> are the matrix elements of the density
+matrix, <span class="math notranslate nohighlight">\(h_{\alpha\beta}\)</span> the one-body Hamiltonian matrix
+elements of the atomic orbitals, and
+<span class="math notranslate nohighlight">\(u^{\alpha\beta}_{\gamma\delta}\)</span> the antisymmetric two-body
+Hamiltonian matrix elements of the atomic orbitals.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The Hartree-Fock energy for general spin-orbitals.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>complex</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
 <dt id="hartree_fock.uhf.UHF.compute_initial_guess">
 <code class="sig-name descname">compute_initial_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_initial_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bleh</p>
