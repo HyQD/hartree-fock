@@ -312,7 +312,7 @@ class HartreeFock:
             print(f"Changing to {self.__class__.__name__} basis")
 
         self.system.change_basis(self._C)
-        self._C = self.np.identity(self.system.l)
+        self._C = self.np.identity(len(self._C))
         self.density_matrix = self.build_density_matrix()
         self.fock_matrix = self.build_fock_matrix()
 
