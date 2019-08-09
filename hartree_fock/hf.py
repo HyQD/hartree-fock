@@ -53,8 +53,11 @@ class HartreeFock:
         :math:`\boldsymbol{\epsilon} = \text{diag}(\epsilon_1, \dots)` the
         diagonal matrix with the eigenvalues from the one-body Hamiltonian.
         The function proceeds by building and storing the density matrix
-        :math:`\boldsymbol{D}` from the coefficient matrices, and the initial
+        :math:`\boldsymbol{D}` from the coefficient matrix, and the initial
         Fock matrix :math:`\boldsymbol{F}`.
+
+        Note that this function is called internally by the
+        ``compute_ground_state``-function.
         """
         # compute initial guess from the one-body part of the hamiltonian and
         # the overlap.
@@ -63,6 +66,24 @@ class HartreeFock:
         self.fock_matrix = self.build_fock_matrix()
 
     def compute_energy(self):
+        r"""Compute general Hartree-Fock energy, given by
+
+        .. math:: E = D_{\beta \alpha} h_{\alpha \beta}
+            + \frac{1}{2} D_{\gamma\alpha} D_{\delta\beta}
+            u^{\alpha\beta}_{\gamma\delta},
+
+        where :math:`D_{\beta\alpha}` are the matrix elements of the density
+        matrix, :math:`h_{\alpha\beta}` the one-body Hamiltonian matrix
+        elements of the atomic orbitals, and
+        :math:`u^{\alpha\beta}_{\gamma\delta}` the antisymmetric two-body
+        Hamiltonian matrix elements of the atomic orbitals.
+
+        Returns
+        -------
+        complex
+            The Hartree-Fock energy for general spin-orbitals.
+        """
+
         return compute_general_hf_energy(
             self.density_matrix,
             self.system.h,
@@ -104,6 +125,22 @@ class HartreeFock:
         return rho_qp
 
     def compute_particle_density(self):
+        r"""Function computing the particle density :math:`\rho(x)` defined
+        by
+
+        .. math:: \rho(x) = \phi^{*}_{q}(x) \rho^{q}_{p} \phi_{p}(x),
+
+        where :math:`\phi_p(x)` are the single-particle functions,
+        :math:`\rho^{q}_{p}` the one-body density matrix, and :math:`x` some
+        coordinate space. Note the use of the Einstein summation convention in
+        the above expression.
+
+        Returns
+        -------
+        np.ndarray
+            Particle density on the same grid as the single-particle functions.
+        """
+
         np = self.np
 
         rho_qp = self.compute_one_body_density_matrix()
@@ -153,6 +190,33 @@ class HartreeFock:
         )
 
     def compute_density_residual(self, prev_density_matrix, density_matrix):
+        r"""Function computing the residual of the density matrices for the
+        convergence test of the self consistent field procedure. That is,
+
+        .. math:: \rvert\rvert \Delta \mathbf{D} \lvert\lvert_{F}
+            = \rvert\rvert
+                \mathbf{D}^{(i + 1)} - \mathbf{D}^{(i)}
+            \lvert\lvert_{F}
+
+        where :math:`\mathbf{D}^{(i)}` is the density matrix at iteration
+        :math:`i` of the self consistent procedure.
+
+        Note that this function works for both single density matrices, and a
+        list of density matrices. This lets the ``UHF``-class reuse this
+        procedure.
+
+        Parameters
+        ----------
+        prev_density_matrix : np.ndarray, list
+            The density matrices at the previous timestep :math:`i`.
+        density_matrix : np.ndarray, list
+            Density matrices at the current timestep :math:`i + 1`.
+
+        Returns
+        -------
+        list
+            The residuals from given density matrices.
+        """
         if not type(prev_density_matrix) in [list, tuple, set]:
             prev_density_matrix = [prev_density_matrix]
             density_matrix = [density_matrix]
@@ -169,6 +233,24 @@ class HartreeFock:
         change_system_basis=False,
         **mixer_kwargs,
     ):
+        r"""Compute the Hartree-Fock ground state using self consistent field
+        iterations.
+
+        Parameters
+        ----------
+        max_iterations : int
+            The maximum number of self consistent iterations. Default is
+            ``100``.
+        tol : float
+            The convergence tolerance for the energy and density residuals.
+            Default is ``1e-4``.
+        change_system_basis : bool
+            Toggle whether or not to change to the Hartree-Fock basis after the
+            self consistent iterations have converged.
+        **mixer_kwargs : dict
+            Keyword arguments to the Fock matrix mixer class.
+        """
+
         if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = self.np
 
@@ -225,6 +307,7 @@ class HartreeFock:
             self.change_basis()
 
     def change_basis(self):
+        """Function changing the system basis to the Hartree-Fock basis."""
         if self.verbose:
             print(f"Changing to {self.__class__.__name__} basis")
 
