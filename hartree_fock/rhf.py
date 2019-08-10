@@ -9,6 +9,9 @@ class RHF(HartreeFock):
         # RHF assumes double occupancies of all orbitals
         self.o = slice(0, self.system.n // 2)
 
+    def compute_one_body_density_matrix(self):
+        return 2 * super().compute_one_body_density_matrix()
+
     def build_density_matrix(self):
         return 2 * build_density_matrix(self._C, self.o, self.np)
 
