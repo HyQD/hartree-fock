@@ -355,6 +355,33 @@ Hamiltonian matrix elements of the atomic orbitals.</p>
 </dl>
 </dd></dl>
 
+<dl class="method">
+<dt id="hartree_fock.rhf.RHF.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the one-body density matrix from the occupied coefficient
+matrix. This is done by</p>
+<div class="math notranslate nohighlight">
+\[\rho^{q}_{p} = \langle\Phi\rvert
+    \hat{c}^{\dagger}_{p} \hat{c}_{q}
+\lvert\Phi\rangle
+= \delta_{p \in o}
+C^{*}_{\alpha p} s_{\alpha \beta} C_{\beta q},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\delta_{p \in o}\)</span> denotes occupied indices <span class="math notranslate nohighlight">\(o = {1,
+\dots, N}\)</span>, <span class="math notranslate nohighlight">\(s_{\alpha\beta}\)</span> are the overlap integrals of the
+atomic orbitals, and <span class="math notranslate nohighlight">\(C_{\alpha p}\)</span> the coefficient matrix. In
+case of converged self consistent iterations, the one-body density
+matrix should yield the identity along the occupied indices and zero
+elsewhere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The one-body density matrix <span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="class">
