@@ -117,7 +117,7 @@ class HartreeFock:
 
         np = self.np
 
-        o = self.system.o
+        o = self.o
 
         rho_qp = np.zeros_like(self.system.h)
         rho_qp[o, o] = self._C[:, o].conj().T @ self.system.s @ self._C[:, o]
