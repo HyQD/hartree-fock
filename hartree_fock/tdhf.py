@@ -96,9 +96,8 @@ class TDHF:
 
     def compute_particle_density(self):
         rho_qp = self.compute_one_body_density_matrix()
-        spf = self.np.tensordot(self._C, self.system.spf, axes=((0), (0)))
 
-        return compute_particle_density(rho_qp, spf, self.np)
+        return compute_particle_density(rho_qp, self.system.spf, self.np)
 
     def compute_time_dependent_overlap(self):
         np = self.np
