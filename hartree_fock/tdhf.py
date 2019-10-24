@@ -66,6 +66,7 @@ class TDHF:
         if C is None:
             C = self.np.eye(self.system.l)
 
+        C = C.astype(self.np.complex128)
         self._C_0 = C.copy()
         self._C = C
 
