@@ -416,6 +416,54 @@ Hamiltonian matrix elements of the atomic orbitals.</p>
 <dd><p>Bleh</p>
 </dd></dl>
 
+<dl class="method">
+<dt id="hartree_fock.uhf.UHF.compute_one_body_density_matrix">
+<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><em class="sig-param">direction='up'</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
+<dd><p>Compute the one-body density matrix from the occupied coefficient
+matrix. This is done by</p>
+<div class="math notranslate nohighlight">
+\[\rho^{q}_{p} = \langle\Phi\rvert
+    \hat{c}^{\dagger}_{p} \hat{c}_{q}
+\lvert\Phi\rangle
+= \delta_{p \in o}
+C^{*}_{\alpha p} s_{\alpha \beta} C_{\beta q},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\delta_{p \in o}\)</span> denotes occupied indices <span class="math notranslate nohighlight">\(o = {1,
+\dots, N}\)</span>, <span class="math notranslate nohighlight">\(s_{\alpha\beta}\)</span> are the overlap integrals of the
+atomic orbitals, and <span class="math notranslate nohighlight">\(C_{\alpha p}\)</span> the coefficient matrix. In
+case of converged self consistent iterations, the one-body density
+matrix should yield the identity along the occupied indices and zero
+elsewhere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The one-body density matrix <span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span>.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.uhf.UHF.compute_particle_density">
+<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><em class="sig-param">direction='up'</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_particle_density" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function computing the particle density <span class="math notranslate nohighlight">\(\rho(x)\)</span> defined
+by</p>
+<div class="math notranslate nohighlight">
+\[\rho(x) = \phi^{*}_{q}(x) \rho^{q}_{p} \phi_{p}(x),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\phi_p(x)\)</span> are the single-particle functions,
+<span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span> the one-body density matrix, and <span class="math notranslate nohighlight">\(x\)</span> some
+coordinate space. Note the use of the Einstein summation convention in
+the above expression.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Particle density on the same grid as the single-particle functions.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
