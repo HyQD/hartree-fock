@@ -5,10 +5,20 @@ from hartree_fock.hf_helper import (
     build_density_matrix,
     build_uhf_fock_matrices,
     compute_error_vector,
+    compute_particle_density,
 )
 
 
 class UHF(HartreeFock):
+    spin_directions = {
+        "up": 0,
+        "down": 1,
+        "alpha": 0,
+        "beta": 1,
+        "a": 0,
+        "b": 1,
+    }
+
     def compute_energy(self):
         np = self.np
 
@@ -34,6 +44,26 @@ class UHF(HartreeFock):
         )
 
         return energy + self.system.nuclear_repulsion_energy
+
+    def compute_one_body_density_matrix(self, direction="up"):
+        ind = self.spin_directions[direction.lower()]
+
+        o = self.system.o_up if ind == 0 else self.system.o_down
+
+        rho_qp = self.np.zeros_like(self.system.h)
+        rho_qp[o, o] = (
+            self._C[ind][:, o].conj().T @ self.system.s @ self._C[ind][:, o]
+        )
+
+        return rho_qp
+
+    def compute_particle_density(self, direction="up"):
+        ind = self.spin_directions[direction.lower()]
+
+        rho_qp = self.compute_one_body_density_matrix(direction=direction)
+        spf = self.np.tensordot(self._C[ind], self.system.spf, axes=((0), (0)))
+
+        return compute_particle_density(rho_qp, spf, self.np)
 
     def compute_initial_guess(self):
         """Bleh
