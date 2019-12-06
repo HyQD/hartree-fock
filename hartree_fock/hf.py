@@ -144,7 +144,7 @@ class HartreeFock:
         np = self.np
 
         rho_qp = self.compute_one_body_density_matrix()
-        spf = np.tensordot(self.C, self.system.spf, axes=((0), (0)))
+        spf = np.tensordot(self._C, self.system.spf, axes=((0), (0)))
 
         return compute_particle_density(rho_qp, spf, self.np)
 
