@@ -44,17 +44,6 @@ def compute_error_vector(fock_matrix, density_matrix, overlap):
     return error_vector
 
 
-def compute_particle_density(rho_qp, spf, np):
-    rho = np.zeros(spf.shape[1:], dtype=spf.dtype)
-    spf_slice = slice(0, spf.shape[0])
-
-    for _i in np.ndindex(rho.shape):
-        i = (spf_slice, *_i)
-        rho[_i] += np.dot(spf[i].conj(), np.dot(rho_qp, spf[i]))
-
-    return rho
-
-
 def create_orthogonalizer(overlap_matrix, np):
     # Equation 3.166 Szabo-Ostlund
     s, U = np.linalg.eigh(overlap_matrix)

@@ -7,7 +7,6 @@ from hartree_fock.hf_helper import (
     build_density_matrix,
     build_general_fock_matrix,
     compute_general_hf_energy,
-    compute_particle_density,
 )
 
 
@@ -98,7 +97,7 @@ class TDHF:
     def compute_particle_density(self):
         rho_qp = self.compute_one_body_density_matrix()
 
-        return compute_particle_density(rho_qp, self.system.spf, self.np)
+        return self.system.compute_particle_density(rho_qp, self._C)
 
     def compute_time_dependent_overlap(self):
         np = self.np

@@ -4,7 +4,6 @@ from hartree_fock.hf_helper import (
     build_density_matrix,
     build_general_fock_matrix,
     compute_error_vector,
-    compute_particle_density,
     compute_general_hf_energy,
 )
 from hartree_fock.mix import EmptyMixer
@@ -144,9 +143,8 @@ class HartreeFock:
         np = self.np
 
         rho_qp = self.compute_one_body_density_matrix()
-        spf = np.tensordot(self._C, self.system.spf, axes=((0), (0)))
 
-        return compute_particle_density(rho_qp, spf, self.np)
+        return self.system.compute_particle_density(rho_qp, c=self._C)
 
     def build_fock_matrix(self):
         return build_general_fock_matrix(

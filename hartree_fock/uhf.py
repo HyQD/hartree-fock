@@ -5,7 +5,6 @@ from hartree_fock.hf_helper import (
     build_density_matrix,
     build_uhf_fock_matrices,
     compute_error_vector,
-    compute_particle_density,
 )
 
 
@@ -61,9 +60,8 @@ class UHF(HartreeFock):
         ind = self.spin_directions[direction.lower()]
 
         rho_qp = self.compute_one_body_density_matrix(direction=direction)
-        spf = self.np.tensordot(self._C[ind], self.system.spf, axes=((0), (0)))
 
-        return compute_particle_density(rho_qp, spf, self.np)
+        return self.system.compute_particle_density(rho_qp, c=self._C[ind])
 
     def compute_initial_guess(self):
         """Bleh
