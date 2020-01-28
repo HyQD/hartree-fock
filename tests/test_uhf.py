@@ -1,3 +1,5 @@
+import pytest
+
 from hartree_fock import UHF
 from hartree_fock.mix import DIIS, AlphaMixer
 from quantum_systems import (
@@ -17,6 +19,7 @@ def get_pysf_uhf_energy(molecule, basis="ccpvdz", **kwargs):
     return uhf.kernel() + mol.energy_nuc()
 
 
+@pytest.mark.skip
 def test_tdho_uhf():
     n = 2
     l = 12
@@ -33,6 +36,7 @@ def test_tdho_uhf():
     assert abs(uhf.compute_energy() - 3.162691) < 1e-6
 
 
+@pytest.mark.skip
 def test_lithium_uhf():
     mol = "li"
     basis = "ccpvdz"
