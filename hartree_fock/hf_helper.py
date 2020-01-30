@@ -17,20 +17,20 @@ def build_rhf_fock_matrix(h, u, density_matrix, np):
 
 
 def build_uhf_fock_matrices(h, u, density_matrix, np):
-    D_up, D_down = density_matrix
-    D_sum = D_up + D_down
+    D_a, D_b = density_matrix
+    D_sum = D_a + D_b
 
-    fock_matrix_up = np.zeros_like(h)
+    fock_matrix_a = np.zeros_like(h)
 
-    fock_matrix_up += h
-    fock_matrix_up += np.tensordot(D_sum, u, axes=((0, 1), (3, 1)))
+    fock_matrix_a += h
+    fock_matrix_a += np.tensordot(D_sum, u, axes=((0, 1), (3, 1)))
 
-    fock_matrix_down = fock_matrix_up.copy()
+    fock_matrix_b = fock_matrix_a.copy()
 
-    fock_matrix_up -= np.tensordot(D_up, u, axes=((0, 1), (2, 1)))
-    fock_matrix_down -= np.tensordot(D_down, u, axes=((0, 1), (2, 1)))
+    fock_matrix_a -= np.tensordot(D_a, u, axes=((0, 1), (2, 1)))
+    fock_matrix_b -= np.tensordot(D_b, u, axes=((0, 1), (2, 1)))
 
-    return fock_matrix_up, fock_matrix_down
+    return fock_matrix_a, fock_matrix_b
 
 
 def compute_error_vector(fock_matrix, density_matrix, overlap):
