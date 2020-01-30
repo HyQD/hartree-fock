@@ -259,6 +259,8 @@ class GHF:
         density_residual = [100]
         energy = self.compute_energy()
 
+        i = 0
+
         for i in range(max_iterations):
             if self.verbose:
                 print(
@@ -285,10 +287,12 @@ class GHF:
 
             energy_residual = abs(energy - energy_prev)
 
-        self._epsilon, self._C = self.diagonalize(
-            self.fock_matrix, self.system.s
-        )
-        self.density_matrix = self.build_density_matrix()
+        if max_iterations > 0:
+            # Make sure that've actually done an SCF iteration
+            self._epsilon, self._C = self.diagonalize(
+                self.fock_matrix, self.system.s
+            )
+            self.density_matrix = self.build_density_matrix()
 
         if self.verbose:
             print(
@@ -297,9 +301,11 @@ class GHF:
                 + f"residual: {density_residual}"
             )
 
-        assert (
-            i < max_iterations - 1
-        ), f"{self.__class__.__name__} solver did not converge."
+        if max_iterations > 0:
+            # Make sure that've actually done an SCF iteration
+            assert (
+                i < max_iterations
+            ), f"{self.__class__.__name__} solver did not converge."
 
         if change_system_basis:
             self.change_basis()
