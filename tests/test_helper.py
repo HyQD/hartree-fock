@@ -12,7 +12,7 @@ def test_density_matrix():
     for i in range(10):
         C = np.random.random((l, l)) + 1j * np.random.random((l, l))
 
-        D = np.einsum("pi, qi -> pq", C[:, o].conj(), C[:, o])
+        D = np.einsum("pi, qi -> qp", C[:, o].conj(), C[:, o])
         D_helper = build_density_matrix(C, o, np)
 
         np.testing.assert_allclose(D, D_helper)

@@ -1,7 +1,7 @@
 def build_density_matrix(C, o, np):
     C_occupied = C[:, o]
 
-    return np.dot(C_occupied, C_occupied.conj().T).T
+    return np.dot(C_occupied, C_occupied.conj().T)
 
 
 def build_general_fock_matrix(h, u, density_matrix, np):
