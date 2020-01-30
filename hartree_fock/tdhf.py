@@ -1,6 +1,6 @@
 import warnings
 
-from hartree_fock import HartreeFock
+from hartree_fock import GHF
 from hartree_fock.integrators import RungeKutta4
 from hartree_fock.hf_helper import (
     create_orthogonalizer,
@@ -11,7 +11,7 @@ from hartree_fock.hf_helper import (
 
 
 class TDHF:
-    hf_class = HartreeFock
+    hf_class = GHF
 
     def __init__(
         self, system, np=None, integrator=None, td_verbose=False, **hf_kwargs

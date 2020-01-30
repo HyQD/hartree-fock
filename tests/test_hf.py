@@ -1,6 +1,6 @@
 import numpy as np
 
-from hartree_fock import HartreeFock
+from hartree_fock import GHF
 from quantum_systems import TwoDimensionalHarmonicOscillator
 
 
@@ -13,7 +13,7 @@ def test_tdho_hf():
     tdho = TwoDimensionalHarmonicOscillator(n, l, radius, num_grid_points)
     tdho.setup_system()
 
-    hf = HartreeFock(tdho, verbose=True)
+    hf = GHF(tdho, verbose=True)
 
     hf.compute_ground_state(tol=1e-10)  # , num_vecs=20, max_iterations=1000)
 
@@ -44,7 +44,7 @@ def test_h2_hf():
 
     system = construct_pyscf_system_ao(molecule, basis=basis)
 
-    hf = HartreeFock(system, verbose=True)
+    hf = GHF(system, verbose=True)
     hf.compute_ground_state(tol=1e-10, change_system_basis=True)
 
     assert abs(hf.compute_energy() - (-1.1322)) < 1e-3

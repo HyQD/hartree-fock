@@ -1,6 +1,6 @@
 import scipy.linalg
 
-from hartree_fock import HartreeFock
+from hartree_fock import GHF
 from hartree_fock.hf_helper import (
     build_density_matrix,
     build_uhf_fock_matrices,
@@ -8,7 +8,7 @@ from hartree_fock.hf_helper import (
 )
 
 
-class UHF(HartreeFock):
+class UHF(GHF):
     spin_directions = {
         "up": 0,
         "down": 1,

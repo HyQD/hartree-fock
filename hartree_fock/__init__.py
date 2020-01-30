@@ -1,6 +1,4 @@
-from .hf import HartreeFock
+from .hf import GHF
 from .rhf import RHF
 from .uhf import UHF
 from .tdhf import TDHF
-
-GHF = HartreeFock

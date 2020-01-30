@@ -1,8 +1,8 @@
-from hartree_fock import HartreeFock
+from hartree_fock import GHF
 from hartree_fock.hf_helper import build_density_matrix, build_rhf_fock_matrix
 
 
-class RHF(HartreeFock):
+class RHF(GHF):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

@@ -9,7 +9,7 @@ from hartree_fock.hf_helper import (
 from hartree_fock.mix import EmptyMixer
 
 
-class HartreeFock:
+class GHF:
     """Class implementing a Hartree-Fock solver using general spin-orbitals.
 
     Parameters
