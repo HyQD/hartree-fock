@@ -14,7 +14,7 @@ pytest = "*"
 numba = "*"
 sympy = "*"
 matplotlib = "*"
-black = "==19.3b0"
+black = "==19.10b0"
 quantum-systems = {editable = true,git = "https://github.com/Schoyen/quantum-systems.git"}
 pyscf = "*"
 sphinx = "*"
