@@ -22,7 +22,7 @@ def test_ghf():
     ghf = GHF(system, verbose=True)
     ghf.compute_ground_state(tol=1e-10)
     e_hf_pyscf = -74.965_900_173_175_2
-    assert abs(rhf.energy() - e_hf_pyscf) < 1e-10
+    assert abs(ghf.energy() - e_hf_pyscf) < 1e-10
 
 
 if __name__ == "__main__":
