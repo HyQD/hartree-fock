@@ -69,7 +69,7 @@ class DIIS(EmptyMixer):
         Matrix library to be used, e.g., numpy, cupy, etc.
     """
 
-    def __init__(self, num_vecs=10, np=None):
+    def __init__(self, num_vecs=6, np=None):
         if np is None:
             import numpy as np
 
