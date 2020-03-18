@@ -3,7 +3,7 @@ import numpy as np
 from hartree_fock import GHF
 from quantum_systems import TwoDimensionalHarmonicOscillator
 
-
+@pytest.mark.skip
 def test_tdho_hf():
     n = 2
     l = 12
@@ -35,7 +35,7 @@ def test_tdho_hf():
 
     rho = hf.compute_particle_density()
 
-
+@pytest.mark.skip
 def test_h2_hf():
     from quantum_systems import construct_pyscf_system_ao
 

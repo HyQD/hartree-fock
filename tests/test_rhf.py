@@ -30,7 +30,7 @@ def test_rhf():
     rhf_alpha.compute_ground_state(tol=1e-10, **mixer_kwargs)
     assert abs(rhf_alpha.total_energy - e_hf_pyscf) < 1e-10
 
-
+@pytest.mark.skip
 def test_tdho_rhf():
     n = 2
     l = 12
