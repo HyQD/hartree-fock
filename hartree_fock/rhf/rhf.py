@@ -20,4 +20,4 @@ class RHF(HartreeFock):
     def compute_energy(self, P, F):
         e_rhf = self.np.trace(self.np.dot(P, self.system.h))
         e_rhf += self.np.trace(self.np.dot(P, F))
-        return 0.5 * e_rhf
+        return 0.5 * e_rhf+self.system.nuclear_repulsion_energy

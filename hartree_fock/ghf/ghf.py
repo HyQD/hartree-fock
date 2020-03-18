@@ -19,4 +19,4 @@ class GHF(HartreeFock):
     def compute_energy(self, P, F):
         e_ghf = self.np.trace(self.np.dot(P, self.system.h))
         e_ghf += self.np.trace(self.np.dot(P, F))
-        return 0.5 * e_ghf
+        return 0.5 * e_ghf+self.system.nuclear_repulsion_energy
