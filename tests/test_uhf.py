@@ -1,5 +1,4 @@
 import pytest
-
 from hartree_fock import UHF
 from hartree_fock.mix import DIIS, AlphaMixer
 from quantum_systems import (
@@ -8,6 +7,7 @@ from quantum_systems import (
 )
 
 
+@pytest.mark.skip
 def get_pysf_uhf_energy(molecule, basis="ccpvdz", **kwargs):
     import pyscf
 

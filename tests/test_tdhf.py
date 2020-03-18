@@ -1,6 +1,6 @@
 import os
 import numpy as np
-
+import pytest
 from hartree_fock import TDHF
 from hartree_fock.integrators import GaussIntegrator
 from quantum_systems import ODQD
@@ -8,6 +8,7 @@ from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
 from quantum_systems.time_evolution_operators import LaserField
 
 
+@pytest.mark.skip
 def test_tdhf():
     n = 2
     l = 20

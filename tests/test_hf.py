@@ -1,9 +1,10 @@
 import numpy as np
-
+import pytest
 from hartree_fock import GHF
 from quantum_systems import TwoDimensionalHarmonicOscillator
 
 
+@pytest.mark.skip
 def test_tdho_hf():
     n = 2
     l = 12
@@ -17,7 +18,7 @@ def test_tdho_hf():
 
     hf.compute_ground_state(tol=1e-10)  # , num_vecs=20, max_iterations=1000)
 
-    assert abs(hf.compute_energy() - 3.162691) < 1e-6
+    assert abs(hf.compute_energy() - 3.162_691) < 1e-6
 
     for i in range(l):
         C_i = hf.C[:, i]
@@ -36,6 +37,7 @@ def test_tdho_hf():
     rho = hf.compute_particle_density()
 
 
+@pytest.mark.skip
 def test_h2_hf():
     from quantum_systems import construct_pyscf_system_ao
 

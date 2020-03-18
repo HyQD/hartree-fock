@@ -24,8 +24,10 @@ class AlphaMixer(EmptyMixer):
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
         self.theta = theta
+        self.stored = 0
+        self.trial_vectors = [0] * 2
 
-    def compute_new_vector(self, trial_vector, direction_vector, error_vector):
+    def compute_new_vector(self, trial_vector, error_vector):
         """Compute new trial vector for mixing with full right hand side. 
         
         See T. Helgaker's book "Molecular Electron-Structure Theory" equations
@@ -45,9 +47,13 @@ class AlphaMixer(EmptyMixer):
         np.array
             New mixed vector.
         """
-        new_trial = trial_vector + direction_vector
 
-        return (1 - self.theta) * new_trial + self.theta * trial_vector
+        self.trial_vectors[0] = self.trial_vectors[1]
+        self.trial_vectors[1] = trial_vector
+
+        return (1 - self.theta) * self.trial_vectors[
+            1
+        ] + self.theta * self.trial_vectors[0]
 
     def clear_vectors(self):
         pass
@@ -69,7 +75,7 @@ class DIIS(EmptyMixer):
         Matrix library to be used, e.g., numpy, cupy, etc.
     """
 
-    def __init__(self, num_vecs=10, np=None):
+    def __init__(self, num_vecs=6, np=None):
         if np is None:
             import numpy as np
 
@@ -81,7 +87,7 @@ class DIIS(EmptyMixer):
         self.direction_vectors = [0] * self.num_vecs
         self.error_vectors = [0] * self.num_vecs
 
-    def compute_new_vector(self, trial_vector, direction_vector, error_vector):
+    def compute_new_vector(self, trial_vector, error_vector):
         """DIIS mixing scheme
 
         Parameters
@@ -104,8 +110,11 @@ class DIIS(EmptyMixer):
         self.stored += 1
 
         self.trial_vectors[new_pos] = trial_vector.ravel()
-        self.direction_vectors[new_pos] = direction_vector.ravel()
+        # self.direction_vectors[new_pos] = direction_vector.ravel()
         self.error_vectors[new_pos] = error_vector.ravel()
+
+        if self.stored < 2:
+            return trial_vector
 
         b_dim = self.stored if self.stored < self.num_vecs else self.num_vecs
 
@@ -143,9 +152,7 @@ class DIIS(EmptyMixer):
         new_trial_vector = np.zeros_like(self.trial_vectors[new_pos])
 
         for i in range(b_dim):
-            new_trial_vector += weights[i] * (
-                self.trial_vectors[i] + self.direction_vectors[i]
-            )
+            new_trial_vector += weights[i] * self.trial_vectors[i]
 
         return new_trial_vector.reshape(trial_vector.shape)
 
