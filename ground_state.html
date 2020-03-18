@@ -21,11 +21,10 @@
   
     
       <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-        <script type="text/javascript" src="_static/jquery.js"></script>
-        <script type="text/javascript" src="_static/underscore.js"></script>
-        <script type="text/javascript" src="_static/doctools.js"></script>
-        <script type="text/javascript" src="_static/language_data.js"></script>
-        <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
@@ -162,142 +161,50 @@
 <code class="docutils literal notranslate"><span class="pre">HartreeFock</span></code>-class, but implement their own methods where needed, e.g., the
 construction of the Fock matrix.</p>
 <dl class="class">
-<dt id="hartree_fock.rhf.RHF">
-<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.rhf.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">*args</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="hartree_fock.rhf.RHF.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF.compute_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute general Hartree-Fock energy, given by</p>
-<div class="math notranslate nohighlight">
-\[E = D_{\beta \alpha} h_{\alpha \beta}
-+ \frac{1}{2} D_{\gamma\alpha} D_{\delta\beta}
-u^{\alpha\beta}_{\gamma\delta},\]</div>
-<p>where <span class="math notranslate nohighlight">\(D_{\beta\alpha}\)</span> are the matrix elements of the density
-matrix, <span class="math notranslate nohighlight">\(h_{\alpha\beta}\)</span> the one-body Hamiltonian matrix
-elements of the atomic orbitals, and
-<span class="math notranslate nohighlight">\(u^{\alpha\beta}_{\gamma\delta}\)</span> the antisymmetric two-body
-Hamiltonian matrix elements of the atomic orbitals.</p>
+<dt id="hartree_fock.hf.HartreeFock">
+<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.hf.</code><code class="sig-name descname">HartreeFock</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'hartree_fock.mix.DIIS'&gt;</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock" title="Permalink to this definition">¶</a></dt>
+<dd><p>Hartree Fock Abstract class</p>
+<p>Abstract base class defining the skeleton of a
+Hartree Fock ground state solver class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The Hartree-Fock energy for general spin-orbitals.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>complex</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>system</strong> (<em>QuantumSystems</em>) – Quantum systems class instance</p></li>
+<li><p><strong>mixer</strong> (<em>AlphaMixer</em>) – AlpaMixer object</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em>) – Prints iterations for ground state computation if True</p></li>
+</ul>
 </dd>
 </dl>
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.change_basis">
+<code class="sig-name descname">change_basis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.change_basis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function changing the system basis to the Hartree-Fock basis.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="hartree_fock.rhf.RHF.compute_one_body_density_matrix">
-<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the one-body density matrix from the occupied coefficient
-matrix. This is done by</p>
-<div class="math notranslate nohighlight">
-\[\rho^{q}_{p} = \langle\Phi\rvert
-    \hat{c}^{\dagger}_{p} \hat{c}_{q}
-\lvert\Phi\rangle
-= \delta_{p \in o}
-C^{*}_{\alpha p} s_{\alpha \beta} C_{\beta q},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\delta_{p \in o}\)</span> denotes occupied indices <span class="math notranslate nohighlight">\(o = {1,
-\dots, N}\)</span>, <span class="math notranslate nohighlight">\(s_{\alpha\beta}\)</span> are the overlap integrals of the
-atomic orbitals, and <span class="math notranslate nohighlight">\(C_{\alpha p}\)</span> the coefficient matrix. In
-case of converged self consistent iterations, the one-body density
-matrix should yield the identity along the occupied indices and zero
-elsewhere.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The one-body density matrix <span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span>.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.ndarray</p>
-</dd>
-</dl>
+<dt id="hartree_fock.hf.HartreeFock.diagonalize">
+<em class="property">static </em><code class="sig-name descname">diagonalize</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">S</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.diagonalize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Solve the generalized eigenvalue problem AC = SCE,
+where E = diag(e1,…,eL)</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="hartree_fock.hf.HartreeFock.initial_guess">
+<code class="sig-name descname">initial_guess</code><span class="sig-paren">(</span><em class="sig-param">key</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.initial_guess" title="Permalink to this definition">¶</a></dt>
+<dd><p>Various initial guesses are used in the litterature.</p>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="class">
+<dt id="hartree_fock.rhf.RHF">
+<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.rhf.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'hartree_fock.mix.DIIS'&gt;</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
 <dt id="hartree_fock.uhf.UHF">
-<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.uhf.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'hartree_fock.mix.EmptyMixer'&gt;</em>, <em class="sig-param">verbose=False</em>, <em class="sig-param">np=None</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="hartree_fock.uhf.UHF.compute_energy">
-<code class="sig-name descname">compute_energy</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_energy" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute general Hartree-Fock energy, given by</p>
-<div class="math notranslate nohighlight">
-\[E = D_{\beta \alpha} h_{\alpha \beta}
-+ \frac{1}{2} D_{\gamma\alpha} D_{\delta\beta}
-u^{\alpha\beta}_{\gamma\delta},\]</div>
-<p>where <span class="math notranslate nohighlight">\(D_{\beta\alpha}\)</span> are the matrix elements of the density
-matrix, <span class="math notranslate nohighlight">\(h_{\alpha\beta}\)</span> the one-body Hamiltonian matrix
-elements of the atomic orbitals, and
-<span class="math notranslate nohighlight">\(u^{\alpha\beta}_{\gamma\delta}\)</span> the antisymmetric two-body
-Hamiltonian matrix elements of the atomic orbitals.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The Hartree-Fock energy for general spin-orbitals.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>complex</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="hartree_fock.uhf.UHF.compute_initial_guess">
-<code class="sig-name descname">compute_initial_guess</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_initial_guess" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function computing the first iteration of the SCF-procedure using
-the UHF ansatz.</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="hartree_fock.uhf.UHF.compute_one_body_density_matrix">
-<code class="sig-name descname">compute_one_body_density_matrix</code><span class="sig-paren">(</span><em class="sig-param">direction='up'</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_one_body_density_matrix" title="Permalink to this definition">¶</a></dt>
-<dd><p>Compute the one-body density matrix from the occupied coefficient
-matrix. This is done by</p>
-<div class="math notranslate nohighlight">
-\[\rho^{q}_{p} = \langle\Phi\rvert
-    \hat{c}^{\dagger}_{p} \hat{c}_{q}
-\lvert\Phi\rangle
-= \delta_{p \in o}
-C^{*}_{\alpha p} s_{\alpha \beta} C_{\beta q},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\delta_{p \in o}\)</span> denotes occupied indices <span class="math notranslate nohighlight">\(o = {1,
-\dots, N}\)</span>, <span class="math notranslate nohighlight">\(s_{\alpha\beta}\)</span> are the overlap integrals of the
-atomic orbitals, and <span class="math notranslate nohighlight">\(C_{\alpha p}\)</span> the coefficient matrix. In
-case of converged self consistent iterations, the one-body density
-matrix should yield the identity along the occupied indices and zero
-elsewhere.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The one-body density matrix <span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span>.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="method">
-<dt id="hartree_fock.uhf.UHF.compute_particle_density">
-<code class="sig-name descname">compute_particle_density</code><span class="sig-paren">(</span><em class="sig-param">direction='up'</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF.compute_particle_density" title="Permalink to this definition">¶</a></dt>
-<dd><p>Function computing the particle density <span class="math notranslate nohighlight">\(\rho(x)\)</span> defined
-by</p>
-<div class="math notranslate nohighlight">
-\[\rho(x) = \phi^{*}_{q}(x) \rho^{q}_{p} \phi_{p}(x),\]</div>
-<p>where <span class="math notranslate nohighlight">\(\phi_p(x)\)</span> are the single-particle functions,
-<span class="math notranslate nohighlight">\(\rho^{q}_{p}\)</span> the one-body density matrix, and <span class="math notranslate nohighlight">\(x\)</span> some
-coordinate space. Note the use of the Einstein summation convention in
-the above expression.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Particle density on the same grid as the single-particle functions.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
+<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.uhf.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
 
 </div>
 
