@@ -77,24 +77,29 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
         for i in range(1, max_iterations):
 
-
             self.f = self.build_fock_matrix(self.density_matrix)
-            #At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis) 
-            error_vector = (self._C.conj().T@self.f@self._C)[self.o,self.v] #Eq. [10.6.23] in Helgaker et. al.
-            #the current fock matrix is the trial_vector
-            f_diis = self.mixer.compute_new_vector(self.f,error_vector)
+            # At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis)
+            error_vector = (self._C.conj().T @ self.f @ self._C)[
+                self.o, self.v
+            ]  # Eq. [10.6.23] in Helgaker et. al.
+            # the current fock matrix is the trial_vector
+            f_diis = self.mixer.compute_new_vector(self.f, error_vector)
 
-            self._total_energy = self.compute_energy(self.density_matrix,self.f)
+            self._total_energy = self.compute_energy(
+                self.density_matrix, self.f
+            )
             converged = abs(self._total_energy - energy_prev) < tol
             if self.verbose:
-                print(f"converged={converged}, total_energy={self._total_energy}, iterations={i}")
+                print(
+                    f"converged={converged}, total_energy={self._total_energy}, iterations={i}"
+                )
             if converged:
                 break
             energy_prev = self._total_energy
 
             self._epsilon, self._C = self.diagonalize(f_diis, self.system.s)
             self.density_matrix = self.build_density_matrix(self._C)
-            
+
     def diagonalize(self, A, S):
         """
         Solve the generalized eigenvalue problem AC = SCE, 

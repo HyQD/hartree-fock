@@ -104,11 +104,13 @@ class DIIS(EmptyMixer):
         self.stored += 1
 
         self.trial_vectors[new_pos] = trial_vector.ravel()
-        #self.direction_vectors[new_pos] = direction_vector.ravel()
+        # self.direction_vectors[new_pos] = direction_vector.ravel()
         self.error_vectors[new_pos] = error_vector.ravel()
 
         if self.stored >= 2:
-            b_dim = self.stored if self.stored < self.num_vecs else self.num_vecs
+            b_dim = (
+                self.stored if self.stored < self.num_vecs else self.num_vecs
+            )
 
             b_vec = np.zeros(b_dim + 1, dtype=trial_vector.dtype)
             b_mat = np.zeros((b_dim + 1, b_dim + 1), dtype=trial_vector.dtype)
@@ -144,7 +146,7 @@ class DIIS(EmptyMixer):
             new_trial_vector = np.zeros_like(self.trial_vectors[new_pos])
 
             for i in range(b_dim):
-                new_trial_vector += weights[i] * self.trial_vectors[i] 
+                new_trial_vector += weights[i] * self.trial_vectors[i]
 
             return new_trial_vector.reshape(trial_vector.shape)
         else:
