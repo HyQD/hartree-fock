@@ -14,7 +14,7 @@ class RHF(HartreeFock):
         F -= 0.5 * self.np.einsum("ls,uslv->uv", P, self.system.u)
         return F
 
-    def compute_energy(self, P, F):
+    def _compute_energy(self, P, F):
         e_rhf = self.np.trace(self.np.dot(P, self.system.h))
         e_rhf += self.np.trace(self.np.dot(P, F))
         return 0.5 * e_rhf + self.system.nuclear_repulsion_energy

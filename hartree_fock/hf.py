@@ -60,7 +60,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def compute_energy(self, P, F):
+    def _compute_energy(self, P, F):
         pass
 
     def compute_energy(self):
@@ -81,7 +81,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
         for i in range(1, max_iterations):
 
             self.f = self.build_fock_matrix(self.density_matrix)
-            self._total_energy = self.compute_energy(
+            self._total_energy = self._compute_energy(
                 self.density_matrix, self.f
             )
 
