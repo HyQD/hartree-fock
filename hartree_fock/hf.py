@@ -63,6 +63,9 @@ class HartreeFock(metaclass=abc.ABCMeta):
     def compute_energy(self, P, F):
         pass
 
+    def compute_energy(self):
+        return self._compute_energy(self.density_matrix, self.f)
+
     def compute_ground_state(
         self, max_iterations=100, tol=1e-4, **mixer_kwargs
     ):
@@ -78,16 +81,10 @@ class HartreeFock(metaclass=abc.ABCMeta):
         for i in range(1, max_iterations):
 
             self.f = self.build_fock_matrix(self.density_matrix)
-            # At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis)
-            error_vector = (self._C.conj().T @ self.f @ self._C)[
-                self.o, self.v
-            ]  # Eq. [10.6.23] in Helgaker et. al.
-            # the current fock matrix is the trial_vector
-            f_diis = self.mixer.compute_new_vector(self.f, error_vector)
-
             self._total_energy = self.compute_energy(
                 self.density_matrix, self.f
             )
+
             converged = abs(self._total_energy - energy_prev) < tol
             if self.verbose:
                 print(
@@ -97,7 +94,13 @@ class HartreeFock(metaclass=abc.ABCMeta):
                 break
             energy_prev = self._total_energy
 
-            self._epsilon, self._C = self.diagonalize(f_diis, self.system.s)
+            # At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis)
+            error_vector = (self._C.conj().T @ self.f @ self._C)[
+                self.o, self.v
+            ]  # Eq. [10.6.23] in Helgaker et. al.
+            # the current fock matrix is the trial_vector
+            f_mixed = self.mixer.compute_new_vector(self.f, error_vector)
+            self._epsilon, self._C = self.diagonalize(f_mixed, self.system.s)
             self.density_matrix = self.build_density_matrix(self._C)
 
     @staticmethod
