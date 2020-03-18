@@ -2,7 +2,7 @@ from hartree_fock.ghf import GHF
 from quantum_systems import TwoDimensionalHarmonicOscillator
 from quantum_systems import construct_pyscf_system_ao
 import numpy as np
-
+import pytest
 
 def test_ghf():
 

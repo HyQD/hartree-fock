@@ -3,7 +3,7 @@ from quantum_systems import TwoDimensionalHarmonicOscillator
 from quantum_systems import construct_pyscf_system_ao
 import numpy as np
 from hartree_fock.mix import AlphaMixer, DIIS
-
+import pytest
 
 def test_rhf():
 
