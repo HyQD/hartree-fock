@@ -100,7 +100,8 @@ class HartreeFock(metaclass=abc.ABCMeta):
             self._epsilon, self._C = self.diagonalize(f_diis, self.system.s)
             self.density_matrix = self.build_density_matrix(self._C)
 
-    def diagonalize(self, A, S):
+    @staticmethod
+    def diagonalize(A, S):
         """
         Solve the generalized eigenvalue problem AC = SCE, 
         where E = diag(e1,...,eL)
