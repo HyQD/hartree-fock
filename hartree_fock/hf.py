@@ -1,7 +1,7 @@
 import abc
 import warnings
 import scipy.linalg
-from hartree_fock.mix import EmptyMixer, AlphaMixer, DIIS
+from hartree_fock.mix import DIIS
 
 
 class HartreeFock(metaclass=abc.ABCMeta):
