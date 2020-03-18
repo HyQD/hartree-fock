@@ -33,6 +33,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
         self.h = self.system.h
         self.u = self.system.u
+        self._total_energy = 0
         self.f = self.system.construct_fock_matrix(self.h, self.u)
         self.initial_guess("identity")
 
@@ -49,12 +50,6 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
     def density_matrix(self):
         return self.build_density_matrix(self._C)
-
-    def energy(self):
-        return (
-            self.compute_energy(self.density_matrix, self.f)
-            + self.system.nuclear_repulsion_energy
-        )
 
     @abc.abstractmethod
     def build_density_matrix(self, C):
@@ -74,27 +69,32 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
         converged = False
         energy_residual = 100
-        energy = self.energy()
+        energy_prev = 0
 
-        if self.verbose:
-            print(f"Initial energy={energy}")
+        if not "np" in mixer_kwargs:
+            mixer_kwargs["np"] = self.np
+        self.mixer = self.mixer(**mixer_kwargs)
 
         for i in range(1, max_iterations):
 
-            self._epsilon, self._C = self.diagonalize(self.f, self.system.s)
-            self.density_matrix = self.build_density_matrix(self._C)
+
             self.f = self.build_fock_matrix(self.density_matrix)
+            #At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis) 
+            error_vector = (self._C.conj().T@self.f@self._C)[self.o,self.v] #Eq. [10.6.23] in Helgaker et. al.
+            #the current fock matrix is the trial_vector
+            f_diis = self.mixer.compute_new_vector(self.f,error_vector)
 
-            energy_prev = energy
-            energy = self.energy()
-            converged = abs(energy - energy_prev) < tol
-
+            self._total_energy = self.compute_energy(self.density_matrix,self.f)
+            converged = abs(self._total_energy - energy_prev) < tol
             if self.verbose:
-                print(f"converged={converged}, e_rhf={energy}, iterations={i}")
-
+                print(f"converged={converged}, total_energy={self._total_energy}, iterations={i}")
             if converged:
                 break
+            energy_prev = self._total_energy
 
+            self._epsilon, self._C = self.diagonalize(f_diis, self.system.s)
+            self.density_matrix = self.build_density_matrix(self._C)
+            
     def diagonalize(self, A, S):
         """
         Solve the generalized eigenvalue problem AC = SCE, 
@@ -119,3 +119,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
     @property
     def epsilon(self):
         return self._epsilon
+
+    @property
+    def total_energy(self):
+        return self._total_energy
