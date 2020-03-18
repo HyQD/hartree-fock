@@ -2,9 +2,6 @@ from hartree_fock.hf import HartreeFock
 
 
 class RHF(HartreeFock):
-    def __init__(self, system, **kwargs):
-        super().__init__(system, **kwargs)
-
     def build_density_matrix(self, C):
         P = 2 * self.np.einsum(
             "ui,vi->uv", C[:, self.system.o], C[:, self.system.o].conj()
