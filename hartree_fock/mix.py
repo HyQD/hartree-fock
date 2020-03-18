@@ -24,8 +24,10 @@ class AlphaMixer(EmptyMixer):
         assert 0 <= theta <= 1, "Mixing parameter theta must be in [0, 1]"
 
         self.theta = theta
+        self.stored = 0
+        self.trial_vectors = [0]*2
 
-    def compute_new_vector(self, trial_vector, direction_vector, error_vector):
+    def compute_new_vector(self, trial_vector, error_vector):
         """Compute new trial vector for mixing with full right hand side. 
         
         See T. Helgaker's book "Molecular Electron-Structure Theory" equations
@@ -45,9 +47,12 @@ class AlphaMixer(EmptyMixer):
         np.array
             New mixed vector.
         """
-        new_trial = trial_vector + direction_vector
+        
+       
+        self.trial_vectors[0] = self.trial_vectors[1]
+        self.trial_vectors[1] = trial_vector
 
-        return (1 - self.theta) * new_trial + self.theta * trial_vector
+        return (1 - self.theta) * self.trial_vectors[1] + self.theta * self.trial_vectors[0]
 
     def clear_vectors(self):
         pass
