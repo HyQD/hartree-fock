@@ -11,7 +11,7 @@ def test_rhf():
     molecule = f"O; H, 1, {r};  H 1 {r} 2 100.0"
     basis = "sto-3g"
     e_hf_pyscf = -74.965_900_173_175_2
-    
+
     system = construct_pyscf_system_ao(
         molecule,
         basis=basis,
@@ -21,13 +21,13 @@ def test_rhf():
         anti_symmetrize=False,
     )
 
-    rhf_diis = RHF(system,mixer=DIIS, verbose=False)
+    rhf_diis = RHF(system, mixer=DIIS, verbose=False)
     rhf_diis.compute_ground_state(tol=1e-10)
     assert abs(rhf_diis.total_energy - e_hf_pyscf) < 1e-10
 
-    rhf_alpha = RHF(system,mixer=AlphaMixer, verbose=False)
-    mixer_kwargs=dict(theta=0.2)
-    rhf_alpha.compute_ground_state(tol=1e-10,**mixer_kwargs)
+    rhf_alpha = RHF(system, mixer=AlphaMixer, verbose=False)
+    mixer_kwargs = dict(theta=0.2)
+    rhf_alpha.compute_ground_state(tol=1e-10, **mixer_kwargs)
     assert abs(rhf_alpha.total_energy - e_hf_pyscf) < 1e-10
 
 
