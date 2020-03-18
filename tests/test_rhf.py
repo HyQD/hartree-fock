@@ -5,6 +5,7 @@ import numpy as np
 from hartree_fock.mix import AlphaMixer, DIIS
 import pytest
 
+
 def test_rhf():
 
     r = 1.871
@@ -29,6 +30,7 @@ def test_rhf():
     mixer_kwargs = dict(theta=0.2)
     rhf_alpha.compute_ground_state(tol=1e-10, **mixer_kwargs)
     assert abs(rhf_alpha.total_energy - e_hf_pyscf) < 1e-10
+
 
 @pytest.mark.skip
 def test_tdho_rhf():

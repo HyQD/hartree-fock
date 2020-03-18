@@ -1,6 +1,7 @@
 import numpy as np
-
+import pytest
 from hartree_fock.hf_helper import build_density_matrix
+
 
 @pytest.mark.skip
 def test_density_matrix():

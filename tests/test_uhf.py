@@ -1,11 +1,11 @@
 import pytest
-
 from hartree_fock import UHF
 from hartree_fock.mix import DIIS, AlphaMixer
 from quantum_systems import (
     TwoDimensionalHarmonicOscillator,
     construct_pyscf_system_ao,
 )
+
 
 @pytest.mark.skip
 def get_pysf_uhf_energy(molecule, basis="ccpvdz", **kwargs):
