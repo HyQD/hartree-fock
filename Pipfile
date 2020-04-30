@@ -7,16 +7,9 @@ verify_ssl = true
 
 [packages]
 tqdm = "*"
-numpy = "*"
-scipy = "*"
-pandas = "*"
 pytest = "*"
-numba = "*"
-sympy = "*"
 matplotlib = "*"
 black = "*"
-quantum-systems = {editable = true,git = "https://github.com/Schoyen/quantum-systems.git"}
-pyscf = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
 
