@@ -160,7 +160,7 @@
 <p>All classes re-use the self-consistent field procedure defined in the
 <code class="docutils literal notranslate"><span class="pre">HartreeFock</span></code>-class, but implement their own methods where needed, e.g., the
 construction of the Fock matrix.</p>
-<dl class="class">
+<dl class="py class">
 <dt id="hartree_fock.hf.HartreeFock">
 <em class="property">class </em><code class="sig-prename descclassname">hartree_fock.hf.</code><code class="sig-name descname">HartreeFock</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'hartree_fock.mix.DIIS'&gt;</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock" title="Permalink to this definition">¶</a></dt>
 <dd><p>Hartree Fock Abstract class</p>
@@ -175,35 +175,35 @@ Hartree Fock ground state solver class.</p>
 </ul>
 </dd>
 </dl>
-<dl class="method">
+<dl class="py method">
 <dt id="hartree_fock.hf.HartreeFock.change_basis">
 <code class="sig-name descname">change_basis</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.change_basis" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function changing the system basis to the Hartree-Fock basis.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hartree_fock.hf.HartreeFock.diagonalize">
-<em class="property">static </em><code class="sig-name descname">diagonalize</code><span class="sig-paren">(</span><em class="sig-param">A</em>, <em class="sig-param">S</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.diagonalize" title="Permalink to this definition">¶</a></dt>
+<em class="property">static </em><code class="sig-name descname">diagonalize</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">A</span></em>, <em class="sig-param"><span class="n">S</span></em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.diagonalize" title="Permalink to this definition">¶</a></dt>
 <dd><p>Solve the generalized eigenvalue problem AC = SCE,
 where E = diag(e1,…,eL)</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="hartree_fock.hf.HartreeFock.initial_guess">
-<code class="sig-name descname">initial_guess</code><span class="sig-paren">(</span><em class="sig-param">key</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.initial_guess" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">initial_guess</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.hf.HartreeFock.initial_guess" title="Permalink to this definition">¶</a></dt>
 <dd><p>Various initial guesses are used in the litterature.</p>
 </dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="hartree_fock.rhf.RHF">
 <em class="property">class </em><code class="sig-prename descclassname">hartree_fock.rhf.</code><code class="sig-name descname">RHF</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">mixer=&lt;class 'hartree_fock.mix.DIIS'&gt;</em>, <em class="sig-param">verbose=False</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.rhf.RHF" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="hartree_fock.uhf.UHF">
-<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.uhf.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param">system</em>, <em class="sig-param">**kwargs</em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF" title="Permalink to this definition">¶</a></dt>
+<em class="property">class </em><code class="sig-prename descclassname">hartree_fock.uhf.</code><code class="sig-name descname">UHF</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">system</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="headerlink" href="#hartree_fock.uhf.UHF" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
