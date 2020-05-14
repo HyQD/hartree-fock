@@ -21,7 +21,7 @@ def test_h2o_ghf():
     )
 
     ghf = GHF(system, verbose=True)
-    ghf.compute_ground_state(tol=1e-10)
+    ghf.compute_ground_state(tol=1e-12)
     e_hf_pyscf = -74.965_900_173_175_2
 
     assert abs(ghf.total_energy - e_hf_pyscf) < 1e-10
