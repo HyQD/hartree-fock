@@ -81,7 +81,6 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
         for i in range(1, max_iterations):
 
-            self.f = self.build_fock_matrix(self.density_matrix)
             self._total_energy = self._compute_energy(
                 self.density_matrix, self.f
             )
@@ -89,10 +88,12 @@ class HartreeFock(metaclass=abc.ABCMeta):
             converged = abs(self._total_energy - energy_prev) < tol
             if self.verbose:
                 print(
-                    f"converged={converged}, total_energy={self._total_energy}, iterations={i}"
+                    f"converged={converged}, total_energy={self._total_energy},"
+                    + f" iterations={i}"
                 )
             if converged:
                 break
+
             energy_prev = self._total_energy
 
             # At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis)
@@ -103,6 +104,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
             f_mixed = self.mixer.compute_new_vector(self.f, error_vector)
             self._epsilon, self._C = self.diagonalize(f_mixed, self.system.s)
             self.density_matrix = self.build_density_matrix(self._C)
+            self.f = self.build_fock_matrix(self.density_matrix)
 
     @staticmethod
     def diagonalize(A, S):
