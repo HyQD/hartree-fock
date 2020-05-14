@@ -43,8 +43,9 @@ class HartreeFock(metaclass=abc.ABCMeta):
         """
         Various initial guesses are used in the litterature.
         """
-        self._epsilon = self.np.diag(self.system.h)
-        self._C = self.np.eye(self.system.l)
+        # self._epsilon = self.np.diag(self.system.h)
+        # self._C = self.np.eye(self.system.l)
+        self._epsilon, self._C = self.diagonalize(self.system.h, self.system.s)
         self.density_matrix = self.build_density_matrix(self._C)
         self.f = self.build_fock_matrix(self.density_matrix)
 
