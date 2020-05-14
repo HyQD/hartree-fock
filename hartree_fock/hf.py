@@ -72,11 +72,11 @@ class HartreeFock(metaclass=abc.ABCMeta):
     ):
 
         converged = False
-        energy_residual = 100
-        energy_prev = 0
+        energy_prev = 1e10
 
         if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = self.np
+
         self.mixer = self.mixer(**mixer_kwargs)
 
         for i in range(1, max_iterations):
