@@ -41,7 +41,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
     def initial_guess(self, key):
         """
-        Various initial guesses are used in the litterature. 
+        Various initial guesses are used in the litterature.
         """
         self._epsilon = self.np.diag(self.system.h)
         self._C = self.np.eye(self.system.l)
@@ -106,7 +106,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
     @staticmethod
     def diagonalize(A, S):
         """
-        Solve the generalized eigenvalue problem AC = SCE, 
+        Solve the generalized eigenvalue problem AC = SCE,
         where E = diag(e1,...,eL)
         """
         return scipy.linalg.eigh(A, S)
