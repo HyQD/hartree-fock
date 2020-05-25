@@ -2,8 +2,8 @@ class EmptyMixer:
     def __init__(self, np=None):
         pass
 
-    def compute_new_vector(self, trial_vector, direction_vector, error_vector):
-        return direction_vector
+    def compute_new_vector(self, trial_vector, error_vector):
+        return trial_vector
 
     def clear_vectors(self):
         pass
