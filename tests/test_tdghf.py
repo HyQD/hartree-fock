@@ -1,14 +1,15 @@
 import os
 import numpy as np
-import pytest
-from hartree_fock import TDHF
-from hartree_fock.integrators import GaussIntegrator
-from quantum_systems import ODQD
-from quantum_systems.quantum_dots.one_dim.one_dim_potentials import HOPotential
+
+from scipy.integrate import complex_ode
+
+from hartree_fock import TDGHF, GHF
+from quantum_systems import ODQD, GeneralOrbitalSystem
 from quantum_systems.time_evolution_operators import LaserField
 
+from gauss_integrator import GaussIntegrator
 
-@pytest.mark.skip
+
 def test_tdhf():
     n = 2
     l = 20
@@ -23,21 +24,27 @@ def test_tdhf():
     E = 1
     laser_pulse = lambda t: E * np.sin(laser_frequency * t)
 
-    odho = ODQD(
+    odho = GeneralOrbitalSystem(
         n,
-        l,
-        grid_length=grid_length,
-        num_grid_points=num_grid_points,
-        a=a,
-        alpha=alpha,
+        ODQD(
+            l,
+            grid_length=grid_length,
+            num_grid_points=num_grid_points,
+            a=a,
+            alpha=alpha,
+            potential=ODQD.HOPotential(omega=omega),
+        ),
     )
-    odho.setup_system(potential=HOPotential(omega=omega))
     odho.set_time_evolution_operator(LaserField(laser_pulse))
 
-    integrator = GaussIntegrator(s=3, eps=1e-6, np=np)
-    tdhf = TDHF(odho, integrator=integrator, verbose=True)
-    tdhf.compute_ground_state(tol=1e-5)
-    tdhf.set_initial_conditions()
+    ghf = GHF(odho, verbose=True).compute_ground_state(tol=1e-5)
+    assert abs(ghf.compute_energy() - 1.17959) < 1e-5
+
+    tdghf = TDGHF(odho, verbose=True)
+    r = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(ghf.C.ravel())
+
+    assert abs(tdghf.compute_energy(r.t, r.y) - ghf.compute_energy()) < 1e-7
 
     rho_tdhf = tdhf.compute_particle_density()
     test_rho = np.loadtxt(os.path.join("tests", "dat", "rho_tdhf_real.dat"))
@@ -56,8 +63,8 @@ def test_tdhf():
     for i, amp in enumerate(tdhf.solve(time_points)):
         overlap[i + 1] = tdhf.compute_time_dependent_overlap()
 
-    # test_overlap = np.loadtxt(
-    #    os.path.join("tests", "dat", "overlap_tdhf_real.dat")
-    # )
+    test_overlap = np.loadtxt(
+        os.path.join("tests", "dat", "overlap_tdhf_real.dat")
+    )
 
-    # np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-6)
+    np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-6)
