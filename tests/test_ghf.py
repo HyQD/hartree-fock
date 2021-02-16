@@ -7,6 +7,64 @@ from quantum_systems import construct_pyscf_system_ao
 import numpy as np
 
 
+def test_lih_ghf():
+
+    molecule = "li 0.0 0.0 0.0; h 3.08 0.0 0.0"
+
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_ao(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=True,
+        anti_symmetrize=True,
+    )
+
+    ghf = GHF(system, verbose=False)
+    ghf.compute_ground_state(tol=1e-12, change_system_basis=False)
+
+    e_ghf = ghf.total_energy.real
+
+    dip_mom_ghf_x = np.trace(
+        np.dot(ghf.density_matrix, system.dipole_moment[0])
+    ).real
+    dip_mom_ghf_y = np.trace(
+        np.dot(ghf.density_matrix, system.dipole_moment[1])
+    ).real
+    dip_mom_ghf_z = np.trace(
+        np.dot(ghf.density_matrix, system.dipole_moment[2])
+    ).real
+
+    import pyscf
+
+    # Build molecule in AO-basis
+    mol = pyscf.gto.Mole()
+    mol.verbose = 0
+    mol.unit = "bohr"
+    mol.build(atom=molecule, basis=basis)
+    nuclear_repulsion_energy = mol.energy_nuc()
+
+    hf = pyscf.scf.RHF(mol)
+    hf.conv_tol = 1e-12
+    hf.kernel()
+    Cocc = hf.mo_coeff[:, : system.n // 2]
+    D = 2 * np.einsum("sj,rj->sr", Cocc.conj(), Cocc)
+    dipole_integrals = mol.intor("int1e_r").reshape(
+        3, system.l // 2, system.l // 2
+    )
+
+    dip_mom_pyscf_x = np.trace(np.dot(D, dipole_integrals[0]))
+    dip_mom_pyscf_y = np.trace(np.dot(D, dipole_integrals[1]))
+    dip_mom_pyscf_z = np.trace(np.dot(D, dipole_integrals[2]))
+
+    assert abs(dip_mom_pyscf_x - dip_mom_ghf_x) < 1e-5
+    assert abs(dip_mom_pyscf_y - dip_mom_ghf_y) < 1e-5
+    assert abs(dip_mom_pyscf_z - dip_mom_ghf_z) < 1e-5
+    assert abs(e_ghf - hf.e_tot) < 1e-5
+
+
 def test_h2o_ghf():
 
     r = 1.871
