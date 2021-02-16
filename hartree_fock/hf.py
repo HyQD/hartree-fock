@@ -34,7 +34,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
         self.h = self.system.h
         self.u = self.system.u
         self._total_energy = 0
-        self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.fock_matrix = self.system.construct_fock_matrix(self.h, self.u)
         self.initial_guess("identity")
 
         self.o, self.v = self.system.o, self.system.v
@@ -47,10 +47,28 @@ class HartreeFock(metaclass=abc.ABCMeta):
         # self._C = self.np.eye(self.system.l)
         self._epsilon, self._C = self.diagonalize(self.system.h, self.system.s)
         self.density_matrix = self.build_density_matrix(self._C)
-        self.f = self.build_fock_matrix(self.density_matrix)
+        self.fock_matrix = self.build_fock_matrix(self.density_matrix)
 
-    def density_matrix(self):
+    def compute_one_body_density_matrix(self):
         return self.build_density_matrix(self._C)
+
+    def compute_particle_density(self):
+        """Computes one-particle density
+        Returns
+        -------
+        np.array
+            Particle density
+        """
+        np = self.np
+
+        rho_qp = self.compute_one_body_density_matrix()
+
+        if np.abs(np.trace(rho_qp) - self.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.n)
+            warnings.warn(warn)
+
+        return self.system.compute_particle_density(rho_qp)
 
     @abc.abstractmethod
     def build_density_matrix(self, C):
@@ -65,10 +83,14 @@ class HartreeFock(metaclass=abc.ABCMeta):
         pass
 
     def compute_energy(self):
-        return self._compute_energy(self.density_matrix, self.f)
+        return self._compute_energy(self.density_matrix, self.fock_matrix)
 
     def compute_ground_state(
-        self, max_iterations=100, tol=1e-4, **mixer_kwargs
+        self,
+        max_iterations=100,
+        tol=1e-4,
+        change_system_basis=True,
+        **mixer_kwargs,
     ):
 
         converged = False
@@ -82,7 +104,7 @@ class HartreeFock(metaclass=abc.ABCMeta):
         for i in range(1, max_iterations):
 
             self._total_energy = self._compute_energy(
-                self.density_matrix, self.f
+                self.density_matrix, self.fock_matrix
             )
 
             converged = abs(self._total_energy - energy_prev) < tol
@@ -97,14 +119,30 @@ class HartreeFock(metaclass=abc.ABCMeta):
             energy_prev = self._total_energy
 
             # At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis)
-            error_vector = (self._C.conj().T @ self.f @ self._C)[
+            error_vector = (self._C.conj().T @ self.fock_matrix @ self._C)[
                 self.o, self.v
             ]  # Eq. [10.6.23] in Helgaker et. al.
             # the current fock matrix is the trial_vector
-            f_mixed = self.mixer.compute_new_vector(self.f, error_vector)
+            f_mixed = self.mixer.compute_new_vector(
+                self.fock_matrix, error_vector
+            )
             self._epsilon, self._C = self.diagonalize(f_mixed, self.system.s)
             self.density_matrix = self.build_density_matrix(self._C)
-            self.f = self.build_fock_matrix(self.density_matrix)
+            self.fock_matrix = self.build_fock_matrix(self.density_matrix)
+
+        if change_system_basis:
+            if self.verbose:
+                print("Changing system basis...")
+
+            self.change_basis()
+
+        if self.verbose:
+            print(
+                f"Final {self.__class__.__name__} energy: "
+                + f"{self.compute_energy()}"
+            )
+
+        return self
 
     @staticmethod
     def diagonalize(A, S):

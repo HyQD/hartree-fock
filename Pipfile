@@ -12,6 +12,7 @@ matplotlib = "*"
 black = "*"
 sphinx = "*"
 sphinx-rtd-theme = "*"
+gauss-integrator = {editable = true, git = "ssh://git@github.com/Schoyen/gauss-integrator.git"}
 
 [requires]
 python_version = "3"
