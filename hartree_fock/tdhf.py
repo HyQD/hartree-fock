@@ -7,6 +7,13 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
         self.verbose = verbose
 
         self.system = system
+
+        self.h = self.system.h
+        self.u = self.system.u
+        #self.f = self.system.construct_fock_matrix(self.h, self.u)
+        self.o = self.system.o
+        self.v = self.system.v
+
         self.np = self.system.np
 
         self.last_timestep = None
@@ -32,7 +39,7 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def build_density_matrix(self, C, o):
+    def build_density_matrix(self, C):
         pass
 
     @abc.abstractmethod
