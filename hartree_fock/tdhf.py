@@ -60,7 +60,7 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
 
         self.update_hamiltonian(current_time)
 
-        density_matrix = self.build_density_matrix(C, self.o)
+        density_matrix = self.build_density_matrix(C)
 
         fock_matrix = self.build_fock_matrix(self.h, self.u, density_matrix)
 
