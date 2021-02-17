@@ -8,7 +8,7 @@ class TDGHF(TimeDependentHartreeFock):
         self.update_hamiltonian(current_time)
 
         C = C.reshape(self.system.l, self.system.l)
-        density_matrix = self.build_density_matrix(C, self.o)
+        density_matrix = self.build_density_matrix(C)
 
         # energy <- D_{ba} h_{ab}
         energy = np.trace(np.dot(density_matrix, self.h))
@@ -21,7 +21,7 @@ class TDGHF(TimeDependentHartreeFock):
         return energy + self.system.nuclear_repulsion_energy
 
     def compute_one_body_expectation_value(self, current_time, C, mat):
-        D = self.build_density_matrix(C, self.system.o)
+        D = self.build_density_matrix(C)
         return self.np.trace(self.np.dot(D, mat))
 
     def compute_one_body_density_matrix(self, current_time, C):
@@ -31,7 +31,8 @@ class TDGHF(TimeDependentHartreeFock):
         pass
 
     def compute_overlap(self, current_time, C_a, C_b):
-        pass
+        S_t = self.np.einsum('ki,kj->ij',C_a[:, self.system.o].conj(), C_b[:, self.system.o])
+        return self.np.abs(self.np.linalg.det(S_t))**2
 
     def build_density_matrix(self, C):
         D = self.np.einsum(
