@@ -21,18 +21,20 @@ class TDGHF(TimeDependentHartreeFock):
         return energy + self.system.nuclear_repulsion_energy
 
     def compute_one_body_expectation_value(self, current_time, C, mat):
-        D = self.build_density_matrix(C)
+        D = self.compute_one_body_density_matrix(current_time, C)
         return self.np.trace(self.np.dot(D, mat))
 
     def compute_one_body_density_matrix(self, current_time, C):
-        pass
+        return self.build_density_matrix(C)
 
     def compute_particle_density(self, current_time, C):
         pass
 
     def compute_overlap(self, current_time, C_a, C_b):
-        S_t = self.np.einsum('ki,kj->ij',C_a[:, self.system.o].conj(), C_b[:, self.system.o])
-        return self.np.abs(self.np.linalg.det(S_t))**2
+        S_t = self.np.einsum(
+            "ki,kj->ij", C_a[:, self.system.o].conj(), C_b[:, self.system.o]
+        )
+        return self.np.abs(self.np.linalg.det(S_t)) ** 2
 
     def build_density_matrix(self, C):
         D = self.np.einsum(
@@ -41,7 +43,5 @@ class TDGHF(TimeDependentHartreeFock):
         return D
 
     def build_fock_matrix(self, h, u, density_matrix):
-        F = self.h + self.np.einsum(
-            "ls,usvl->uv", density_matrix, self.system.u
-        )
+        F = self.h + self.np.einsum("ls,usvl->uv", density_matrix, self.u)
         return F

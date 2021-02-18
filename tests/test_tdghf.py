@@ -11,8 +11,6 @@ from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from gauss_integrator import GaussIntegrator
 from quantum_systems import construct_pyscf_system_ao
 
-from matplotlib import pyplot as plt
-
 
 def test_helium():
     class sine_square_laser:
@@ -213,6 +211,8 @@ def test_h2():
             )
         if i % 100 == 0:
             print(i)
+
+    from matplotlib import pyplot as plt
 
     plt.figure()
     plt.plot(time_points, energy.real)

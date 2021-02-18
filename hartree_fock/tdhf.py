@@ -10,9 +10,7 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
 
         self.h = self.system.h
         self.u = self.system.u
-        #self.f = self.system.construct_fock_matrix(self.h, self.u)
-        self.o = self.system.o
-        self.v = self.system.v
+        self.fock_matrix = self.system.construct_fock_matrix(self.h, self.u)
 
         self.np = self.system.np
 
@@ -62,11 +60,13 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
 
         density_matrix = self.build_density_matrix(C)
 
-        fock_matrix = self.build_fock_matrix(self.h, self.u, density_matrix)
+        self.fock_matrix = self.build_fock_matrix(
+            self.h, self.u, density_matrix
+        )
 
         self.last_timestep = current_time
 
-        return -1j * self.np.dot(fock_matrix, C).ravel()
+        return -1j * self.np.dot(self.fock_matrix, C).ravel()
 
 
 # from hartree_fock import GHF
