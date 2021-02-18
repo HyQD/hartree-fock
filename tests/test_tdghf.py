@@ -13,6 +13,108 @@ from quantum_systems import construct_pyscf_system_ao
 
 from matplotlib import pyplot as plt
 
+
+def test_helium():
+    class sine_square_laser:
+        def __init__(self, E0, omega, td, phase=0.0, start=0.0):
+            self.F_str = E0
+            self.omega = omega
+            self.tprime = td
+            self.phase = phase
+            self.t0 = start
+
+        def _phase(self, t):
+            if callable(self.phase):
+                return self.phase(t)
+            else:
+                return self.phase
+
+        def __call__(self, t):
+            dt = t - self.t0
+            pulse = (
+                (np.sin(np.pi * dt / self.tprime) ** 2)
+                * np.heaviside(dt, 1.0)
+                * np.heaviside(self.tprime - dt, 1.0)
+                * np.sin(self.omega * dt + self._phase(dt))
+                * self.F_str
+            )
+            return pulse
+
+    molecule = "he 0.0 0.0 0.0"
+
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_ao(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=True,
+        anti_symmetrize=True,
+    )
+
+    ghf = GHF(system, verbose=False)
+    ghf.compute_ground_state(tol=1e-12, change_system_basis=True)
+
+    laser_pulse = sine_square_laser(E0=100.0, omega=2.87, td=5, phase=np.pi / 2)
+    polarization = np.zeros(3)
+    polarization_direction = 2
+    polarization[polarization_direction] = 1
+    system.set_time_evolution_operator(
+        DipoleFieldInteraction(laser_pulse, polarization_vector=polarization)
+    )
+
+    tdghf = TDGHF(system, verbose=True)
+    r = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
+    r.set_initial_value(ghf.C.ravel())
+
+    dt = 1e-2
+    tfinal = 5
+    num_steps = int(tfinal / dt) + 1
+    time_points = np.linspace(0, tfinal, num_steps)
+
+    energy = np.zeros(num_steps, dtype=np.complex128)
+    overlap = np.zeros(num_steps)
+    dipole_moment = np.zeros((num_steps, 3), dtype=np.complex128)
+
+    energy[0] = tdghf.compute_energy(0, r.y.reshape(system.l, system.l))
+    overlap[0] = tdghf.compute_overlap(
+        0, r.y.reshape(system.l, system.l), ghf.C
+    )
+
+    for j in range(3):
+        dipole_moment[0, j] = -tdghf.compute_one_body_expectation_value(
+            0, r.y.reshape(system.l, system.l), system.position[j]
+        )
+
+    for i in range(num_steps - 1):
+
+        r.integrate(r.t + dt)
+
+        energy[i + 1] = tdghf.compute_energy(
+            r.t + dt, r.y.reshape(system.l, system.l)
+        )
+
+        overlap[i + 1] = tdghf.compute_overlap(
+            r.t + dt, r.y.reshape(system.l, system.l), ghf.C
+        )
+
+        for j in range(3):
+            dipole_moment[i + 1, j] = -tdghf.compute_one_body_expectation_value(
+                r.t + dt, r.y.reshape(system.l, system.l), system.position[j]
+            )
+
+    test_energy = np.load("dat/tdghf_helium_energy.npy")
+    test_overlap = np.load("dat/tdghf_helium_overlap.npy")
+    test_dip_z = np.load("dat/tdghf_helium_dip_z.npy")
+
+    np.testing.assert_allclose(energy.real, test_energy.real, atol=1e-6)
+    np.testing.assert_allclose(overlap, test_overlap, atol=1e-6)
+    np.testing.assert_allclose(
+        dipole_moment[:, 2].real, test_dip_z.real, atol=1e-6
+    )
+
+
 @pytest.mark.skip
 def test_h2():
 
@@ -121,112 +223,6 @@ def test_h2():
 
 
 @pytest.mark.skip
-def test_helium():
-    class sine_square_laser:
-        def __init__(self, E0, omega, td, phase=0.0, start=0.0):
-            self.F_str = E0
-            self.omega = omega
-            self.tprime = td
-            self.phase = phase
-            self.t0 = start
-
-        def _phase(self, t):
-            if callable(self.phase):
-                return self.phase(t)
-            else:
-                return self.phase
-
-        def __call__(self, t):
-            dt = t - self.t0
-            pulse = (
-                (np.sin(np.pi * dt / self.tprime) ** 2)
-                * np.heaviside(dt, 1.0)
-                * np.heaviside(self.tprime - dt, 1.0)
-                * np.sin(self.omega * dt + self._phase(dt))
-                * self.F_str
-            )
-            return pulse
-
-    molecule = "he 0.0 0.0 0.0"
-
-    basis = "cc-pvdz"
-
-    system = construct_pyscf_system_ao(
-        molecule,
-        basis=basis,
-        np=np,
-        verbose=False,
-        add_spin=True,
-        anti_symmetrize=True,
-    )
-
-    ghf = GHF(system, verbose=False)
-    ghf.compute_ground_state(tol=1e-12, change_system_basis=True)
-
-    laser_pulse = sine_square_laser(E0=100.0, omega=2.87, td=5, phase=np.pi / 2)
-    polarization = np.zeros(3)
-    polarization_direction = 2
-    polarization[polarization_direction] = 1
-    system.set_time_evolution_operator(
-        DipoleFieldInteraction(laser_pulse, polarization_vector=polarization)
-    )
-
-    tdghf = TDGHF(system, verbose=True)
-    r = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
-    r.set_initial_value(ghf.C.ravel())
-
-    dt = 1e-2
-    tfinal = 5
-    num_steps = int(tfinal / dt) + 1
-    print(f"num_steps={num_steps}")
-    time_points = np.linspace(0, tfinal, num_steps)
-
-    energy = np.zeros(num_steps, dtype=np.complex128)
-    overlap = np.zeros(num_steps)
-    dipole_moment = np.zeros((num_steps, 3), dtype=np.complex128)
-
-    energy[0] = tdghf.compute_energy(0, r.y.reshape(system.l, system.l))
-    overlap[0] = tdghf.compute_overlap(
-        0, r.y.reshape(system.l, system.l), ghf.C
-    )
-
-    for j in range(3):
-        dipole_moment[0, j] = -tdghf.compute_one_body_expectation_value(
-            0, r.y.reshape(system.l, system.l), system.position[j]
-        )
-
-    for i in range(num_steps - 1):
-
-        r.integrate(r.t + dt)
-
-        energy[i + 1] = tdghf.compute_energy(
-            r.t + dt, r.y.reshape(system.l, system.l)
-        )
-
-        overlap[i + 1] = tdghf.compute_overlap(
-            r.t + dt, r.y.reshape(system.l, system.l), ghf.C
-        )
-
-        for j in range(3):
-            dipole_moment[i + 1, j] = -tdghf.compute_one_body_expectation_value(
-                r.t + dt, r.y.reshape(system.l, system.l), system.position[j]
-            )
-
-        print(i)
-
-    plt.figure()
-    plt.plot(time_points, energy.real)
-
-    plt.figure()
-    plt.plot(time_points, overlap)
-
-    plt.figure()
-    plt.plot(time_points, dipole_moment[:, polarization_direction].real)
-
-    plt.show()
-
-
-@pytest.mark.skip
 def test_tdhf():
     n = 2
     l = 20
@@ -301,7 +297,3 @@ def test_tdhf():
     plt.plot(time_points, test_overlap[:, 1].real)
 
     plt.show()
-
-
-if __name__ == "__main__":
-    test_h2()
