@@ -104,9 +104,13 @@ def test_helium():
                 r.t + dt, r.y.reshape(system.l, system.l), system.position[j]
             )
 
-    test_energy = np.load("dat/tdghf_helium_energy.npy")
-    test_overlap = np.load("dat/tdghf_helium_overlap.npy")
-    test_dip_z = np.load("dat/tdghf_helium_dip_z.npy")
+    test_energy = np.load(
+        os.path.join("tests", "dat", "tdghf_helium_energy.npy")
+    )
+    test_overlap = np.load(
+        os.path.join("tests", "dat", "tdghf_helium_overlap.npy")
+    )
+    test_dip_z = np.load(os.path.join("tests", "dat", "tdghf_helium_dip_z.npy"))
 
     np.testing.assert_allclose(energy.real, test_energy.real, atol=1e-6)
     np.testing.assert_allclose(overlap, test_overlap, atol=1e-6)
