@@ -7,6 +7,11 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
         self.verbose = verbose
 
         self.system = system
+
+        self.h = self.system.h
+        self.u = self.system.u
+        self.fock_matrix = self.system.construct_fock_matrix(self.h, self.u)
+
         self.np = self.system.np
 
         self.last_timestep = None
@@ -23,16 +28,25 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
     def compute_one_body_density_matrix(self, current_time, C):
         pass
 
-    @abc.abstractmethod
     def compute_particle_density(self, current_time, C):
-        pass
+
+        np = self.np
+
+        rho_qp = self.compute_one_body_density_matrix(current_time, C)
+
+        if np.abs(np.trace(rho_qp) - self.system.n) > 1e-8:
+            warn = "Trace of rho_qp = {0} != {1} = number of particles"
+            warn = warn.format(np.trace(rho_qp), self.system.n)
+            warnings.warn(warn)
+
+        return self.system.compute_particle_density(rho_qp)
 
     @abc.abstractmethod
     def compute_overlap(self, current_time, C_a, C_b):
         pass
 
     @abc.abstractmethod
-    def build_density_matrix(self, C, o):
+    def build_density_matrix(self, C):
         pass
 
     @abc.abstractmethod
@@ -53,13 +67,15 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
 
         self.update_hamiltonian(current_time)
 
-        density_matrix = self.build_density_matrix(C, self.o)
+        density_matrix = self.build_density_matrix(C)
 
-        fock_matrix = self.build_fock_matrix(self.h, self.u, density_matrix)
+        self.fock_matrix = self.build_fock_matrix(
+            self.h, self.u, density_matrix
+        )
 
         self.last_timestep = current_time
 
-        return -1j * self.np.dot(fock_matrix, C).ravel()
+        return -1j * self.np.dot(self.fock_matrix, C).ravel()
 
 
 # from hartree_fock import GHF

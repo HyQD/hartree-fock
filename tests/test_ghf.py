@@ -51,7 +51,7 @@ def test_lih_ghf():
     hf.kernel()
     Cocc = hf.mo_coeff[:, : system.n // 2]
     D = 2 * np.einsum("sj,rj->sr", Cocc.conj(), Cocc)
-    dipole_integrals = mol.intor("int1e_r").reshape(
+    dipole_integrals = -mol.intor("int1e_r").reshape(
         3, system.l // 2, system.l // 2
     )
 
