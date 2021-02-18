@@ -27,9 +27,6 @@ class TDGHF(TimeDependentHartreeFock):
     def compute_one_body_density_matrix(self, current_time, C):
         return self.build_density_matrix(C)
 
-    def compute_particle_density(self, current_time, C):
-        pass
-
     def compute_overlap(self, current_time, C_a, C_b):
         S_t = self.np.einsum(
             "ki,kj->ij", C_a[:, self.system.o].conj(), C_b[:, self.system.o]
