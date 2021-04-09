@@ -66,6 +66,8 @@ def test_helium():
     r = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
     r.set_initial_value(ghf.C.ravel())
 
+    c_0 = r.y.copy()
+
     dt = 1e-2
     tfinal = 5
     num_steps = int(tfinal / dt) + 1
@@ -73,34 +75,32 @@ def test_helium():
 
     energy = np.zeros(num_steps, dtype=np.complex128)
     overlap = np.zeros(num_steps)
-    dipole_moment = np.zeros((num_steps, 3), dtype=np.complex128)
+    dipole_moment = np.zeros((num_steps, system.dim), dtype=np.complex128)
 
-    energy[0] = tdghf.compute_energy(0, r.y.reshape(system.l, system.l))
-    overlap[0] = tdghf.compute_overlap(
-        0, r.y.reshape(system.l, system.l), ghf.C
-    )
+    i = 0
 
-    for j in range(3):
-        dipole_moment[0, j] = -tdghf.compute_one_body_expectation_value(
-            0, r.y.reshape(system.l, system.l), system.position[j]
-        )
+    while r.successful() and r.t < tfinal:
+        assert abs(time_points[i] - r.t) < dt * 0.1
 
-    for i in range(num_steps - 1):
+        energy[i] = tdghf.compute_energy(r.t, r.y)
+        overlap[i] = tdghf.compute_overlap(r.t, r.y, c_0)
 
-        r.integrate(r.t + dt)
-
-        energy[i + 1] = tdghf.compute_energy(
-            r.t + dt, r.y.reshape(system.l, system.l)
-        )
-
-        overlap[i + 1] = tdghf.compute_overlap(
-            r.t + dt, r.y.reshape(system.l, system.l), ghf.C
-        )
-
-        for j in range(3):
-            dipole_moment[i + 1, j] = -tdghf.compute_one_body_expectation_value(
-                r.t + dt, r.y.reshape(system.l, system.l), system.position[j]
+        for j in range(system.dim):
+            dipole_moment[i, j] = tdghf.compute_one_body_expectation_value(
+                r.t, r.y, system.dipole_moment[j]
             )
+
+        i += 1
+
+        r.integrate(time_points[i])
+
+    energy[i] = tdghf.compute_energy(r.t, r.y)
+    overlap[i] = tdghf.compute_overlap(r.t, r.y, c_0)
+
+    for j in range(system.dim):
+        dipole_moment[i, j] = tdghf.compute_one_body_expectation_value(
+            r.t, r.y, system.dipole_moment[j]
+        )
 
     test_energy = np.load(
         os.path.join("tests", "dat", "tdghf_helium_energy.npy")
