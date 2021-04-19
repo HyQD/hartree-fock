@@ -226,10 +226,9 @@ def test_h2():
     plt.show()
 
 
-@pytest.mark.skip
-def test_tdhf():
+def test_tdghf():
     n = 2
-    l = 20
+    l = 10
 
     omega = 0.25
     grid_length = 10
@@ -258,19 +257,31 @@ def test_tdhf():
         DipoleFieldInteraction(laser_pulse, polarization_vector=polarization)
     )
 
-    ghf = GHF(odho, verbose=True).compute_ground_state(tol=1e-5)
-    assert abs(ghf.compute_energy() - 1.17959) < 1e-5
+    ghf = GHF(odho, verbose=True).compute_ground_state(tol=1e-7)
+    assert abs(ghf.compute_energy() - 1.17959) < 1e-4
 
     tdghf = TDGHF(odho, verbose=True)
     r = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-6)
     r.set_initial_value(ghf.C.ravel())
 
+    c_0 = r.y.copy()
+
     assert abs(tdghf.compute_energy(r.t, r.y) - ghf.compute_energy()) < 1e-7
 
-    # rho_tdhf = tdghf.compute_particle_density()
-    # test_rho = np.loadtxt(os.path.join("tests", "dat", "rho_tdhf_real.dat"))
+    rho_tdhf = tdghf.compute_particle_density(r.t, r.y)
+    test_rho = np.loadtxt(os.path.join("tests", "dat", "rho_tdhf_real.dat"))
 
-    # np.testing.assert_allclose(rho_tdhf.real, test_rho[:, 1], atol=1e-6)
+    np.testing.assert_allclose(rho_tdhf.real, test_rho[:, 1], atol=1e-3)
+
+    # import matplotlib.pyplot as plt
+
+    # plt.figure()
+    # plt.plot(odho._basis_set.grid, rho_tdhf.real, label="TDHF")
+    # plt.plot(test_rho[:, 0], test_rho[:, 1], label="Test")
+    # plt.grid()
+    # plt.legend()
+    # plt.show()
+    # wat
 
     t_start = 0
     t_end = 4 * 2 * np.pi / laser_frequency
@@ -278,26 +289,33 @@ def test_tdhf():
 
     num_timesteps = int((t_end - t_start) / dt + 1)
     time_points = np.linspace(t_start, t_end, num_timesteps)
+
     overlap = np.zeros(num_timesteps, dtype=np.complex128)
-    overlap[0] = tdghf.compute_overlap(0, r.y.reshape(odho.l, odho.l), ghf.C)
 
-    for i in range(num_timesteps - 1):
+    i = 0
 
-        r.integrate(r.t + dt)
+    while r.successful() and r.t < t_end:
+        assert abs(time_points[i] - r.t) < dt * 0.1
 
-        overlap[i + 1] = tdghf.compute_overlap(
-            r.t + dt, r.y.reshape(odho.l, odho.l), ghf.C
-        )
+        overlap[i] = tdghf.compute_overlap(r.t, r.y, c_0)
 
-        print(i)
+        i += 1
+        r.integrate(time_points[i])
+
+    overlap[i] = tdghf.compute_overlap(r.t, r.y, c_0)
 
     test_overlap = np.loadtxt(
         os.path.join("tests", "dat", "overlap_tdhf_real.dat")
     )
 
-    # np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-6)
-    plt.figure()
-    plt.plot(time_points, overlap)
-    plt.plot(time_points, test_overlap[:, 1].real)
+    np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-3)
 
-    plt.show()
+    # import matplotlib.pyplot as plt
+
+    # plt.figure()
+    # plt.plot(time_points, overlap, label="TDGHF")
+    # plt.plot(time_points, test_overlap[:, 1].real, label="Test")
+    # plt.grid()
+    # plt.legend()
+
+    # plt.show()
