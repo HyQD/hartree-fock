@@ -21,9 +21,14 @@ class TDRHF(TimeDependentHartreeFock):
         return self.np.trace(self.np.dot(D, mat))
 
     def compute_one_body_density_matrix(self, current_time, C):
+        C = C.reshape(self.system.l, self.system.l)
+
         return self.build_density_matrix(C)
 
     def compute_overlap(self, current_time, C_a, C_b):
+        C_a = C_a.reshape(self.system.l, self.system.l)
+        C_b = C_b.reshape(self.system.l, self.system.l)
+
         S_t = self.np.einsum(
             "ki,kj->ij", C_a[:, self.system.o].conj(), C_b[:, self.system.o]
         )

@@ -9,7 +9,7 @@ from quantum_systems import ODQD, GeneralOrbitalSystem
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 
 from gauss_integrator import GaussIntegrator
-from quantum_systems import construct_pyscf_system_ao
+from quantum_systems import construct_pyscf_system_ao, SpatialOrbitalSystem
 
 
 def test_helium():
@@ -115,3 +115,98 @@ def test_helium():
     np.testing.assert_allclose(
         dipole_moment[:, 2].real, test_dip_z.real, atol=1e-6
     )
+
+
+def test_tdrhf():
+    n = 2
+    l = 10
+
+    omega = 0.25
+    grid_length = 10
+    num_grid_points = 801
+    a = 0.25
+    alpha = 1
+
+    laser_frequency = 8 * omega
+    E = 1
+    laser_pulse = lambda t: E * np.sin(laser_frequency * t)
+    polarization = np.zeros(1)
+    polarization[0] = 1
+
+    odho = SpatialOrbitalSystem(
+        n,
+        ODQD(
+            l,
+            grid_length=grid_length,
+            num_grid_points=num_grid_points,
+            a=a,
+            alpha=alpha,
+            potential=ODQD.HOPotential(omega=omega),
+        ),
+    )
+    odho.set_time_evolution_operator(
+        DipoleFieldInteraction(laser_pulse, polarization_vector=polarization)
+    )
+
+    rhf = RHF(odho, verbose=True).compute_ground_state(tol=1e-7)
+    assert abs(rhf.compute_energy() - 1.17959) < 1e-4
+
+    tdrhf = TDRHF(odho, verbose=True)
+    r = complex_ode(tdrhf).set_integrator("GaussIntegrator", s=3, eps=1e-6)
+    r.set_initial_value(rhf.C.ravel())
+
+    c_0 = r.y.copy()
+
+    assert abs(tdrhf.compute_energy(r.t, r.y) - rhf.compute_energy()) < 1e-7
+
+    rho_tdrhf = tdrhf.compute_particle_density(r.t, r.y)
+    test_rho = np.loadtxt(os.path.join("tests", "dat", "rho_tdhf_real.dat"))
+
+    np.testing.assert_allclose(rho_tdrhf.real, test_rho[:, 1], atol=1e-3)
+
+    # import matplotlib.pyplot as plt
+
+    # plt.figure()
+    # plt.plot(odho._basis_set.grid, rho_tdrhf.real, label="TDRF")
+    # plt.plot(test_rho[:, 0], test_rho[:, 1], label="Test")
+    # plt.grid()
+    # plt.legend()
+    # plt.show()
+    # wat
+
+    t_start = 0
+    t_end = 4 * 2 * np.pi / laser_frequency
+    dt = 1e-2
+
+    num_timesteps = int((t_end - t_start) / dt + 1)
+    time_points = np.linspace(t_start, t_end, num_timesteps)
+
+    overlap = np.zeros(num_timesteps, dtype=np.complex128)
+
+    i = 0
+
+    while r.successful() and r.t < t_end:
+        assert abs(time_points[i] - r.t) < dt * 0.1
+
+        overlap[i] = tdrhf.compute_overlap(r.t, r.y, c_0)
+
+        i += 1
+        r.integrate(time_points[i])
+
+    overlap[i] = tdrhf.compute_overlap(r.t, r.y, c_0)
+
+    test_overlap = np.loadtxt(
+        os.path.join("tests", "dat", "overlap_tdhf_real.dat")
+    )
+
+    np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-3)
+
+    # import matplotlib.pyplot as plt
+
+    # plt.figure()
+    # plt.plot(time_points, overlap, label="TDRHF")
+    # plt.plot(time_points, test_overlap[:, 1].real, label="Test")
+    # plt.grid()
+    # plt.legend()
+
+    # plt.show()
