@@ -32,7 +32,11 @@ odqd = ODQD(
 )
 
 gos = GeneralOrbitalSystem(n, odqd.copy_basis())
+gos_2 = GeneralOrbitalSystem(n, odqd.copy_basis())
 spas = SpatialOrbitalSystem(n, odqd)
+
+gos_2._basis_set.h = gos_2._basis_set.h + 0.1 * gos_2._basis_set.spin_z
+
 
 # for i in range(0, gos.l, 2):
 #     norm = gos.s[i, i] + gos.s[i + 1, i + 1]
@@ -106,7 +110,30 @@ plt.grid()
 plt.legend()
 
 ghf = GHF(gos, verbose=True).compute_ground_state(tol=1e-7)
+ghf_2 = GHF(gos_2, verbose=True).compute_ground_state(tol=1e-7)
 rhf = RHF(spas, verbose=True).compute_ground_state(tol=1e-7)
+
+plt.figure()
+plt.title("GHF 2 basis")
+plt.plot(gos_2._basis_set.grid, potential(gos._basis_set.grid))
+
+for i in range(0, gos_2.l):
+    color = colors[(i // 2) % len(colors)]
+    # norm = 1 / np.abs(gos.s[i, i] + gos.s[i + 1, i + 1])
+
+    plt.plot(
+        gos_2._basis_set.grid,
+        np.abs(gos_2.spf[i]) ** 2 + gos_2.h[i, i].real,
+        # norm ** 2 * (np.abs(gos.spf[i]) + np.abs(gos.spf[i + 1])) ** 2
+        # np.abs(norm * (gos.spf[i] + gos.spf[i + 1])) ** 2
+        # + norm * (gos.h[i, i] + gos.h[i + 1, i + 1]).real,
+        "-" + color,
+        label=r"$\psi_{" + f"{i}" + r"}$",
+    )
+
+plt.grid()
+plt.legend()
+
 
 plt.figure()
 plt.title("GHF basis (spin-traced)")
@@ -149,38 +176,38 @@ for i in range(0, gos.l):
 plt.grid()
 plt.legend()
 
-plt.figure()
-plt.title("GHF basis (Re and Im) (spin-traced)")
-plt.plot(gos._basis_set.grid, potential(gos._basis_set.grid))
-
-
-for i in range(0, gos.l, 2):
-    color = colors[(i // 2) % len(colors)]
-
-    norm = 1 / np.abs(gos.s[i, i] + gos.s[i + 1, i + 1])
-
-    plt.plot(
-        gos._basis_set.grid,
-        norm * (gos.spf[i] + gos.spf[i + 1]).real
-        # norm ** 2 * (np.abs(gos.spf[i]) + np.abs(gos.spf[i + 1])) ** 2
-        # np.abs(norm * (gos.spf[i] + gos.spf[i + 1])) ** 2
-        + norm * (gos.h[i, i] + gos.h[i + 1, i + 1]).real,
-        "-" + color,
-        label=r"$\Re{\psi_{" + f"{i // 2}" + r"}}$",
-    )
-
-    plt.plot(
-        gos._basis_set.grid,
-        norm * (gos.spf[i] + gos.spf[i + 1]).imag
-        # norm ** 2 * (np.abs(gos.spf[i]) + np.abs(gos.spf[i + 1])) ** 2
-        # np.abs(norm * (gos.spf[i] + gos.spf[i + 1])) ** 2
-        + norm * (gos.h[i, i] + gos.h[i + 1, i + 1]).real,
-        "--" + color,
-        label=r"$\Im{\psi_{" + f"{i // 2}" + r"}}$",
-    )
-
-plt.grid()
-plt.legend()
+# plt.figure()
+# plt.title("GHF basis (Re and Im) (spin-traced)")
+# plt.plot(gos._basis_set.grid, potential(gos._basis_set.grid))
+#
+#
+# for i in range(0, gos.l, 2):
+#     color = colors[(i // 2) % len(colors)]
+#
+#     norm = 1 / np.abs(gos.s[i, i] + gos.s[i + 1, i + 1])
+#
+#     plt.plot(
+#         gos._basis_set.grid,
+#         norm * (gos.spf[i] + gos.spf[i + 1]).real
+#         # norm ** 2 * (np.abs(gos.spf[i]) + np.abs(gos.spf[i + 1])) ** 2
+#         # np.abs(norm * (gos.spf[i] + gos.spf[i + 1])) ** 2
+#         + norm * (gos.h[i, i] + gos.h[i + 1, i + 1]).real,
+#         "-" + color,
+#         label=r"$\Re{\psi_{" + f"{i // 2}" + r"}}$",
+#     )
+#
+#     plt.plot(
+#         gos._basis_set.grid,
+#         norm * (gos.spf[i] + gos.spf[i + 1]).imag
+#         # norm ** 2 * (np.abs(gos.spf[i]) + np.abs(gos.spf[i + 1])) ** 2
+#         # np.abs(norm * (gos.spf[i] + gos.spf[i + 1])) ** 2
+#         + norm * (gos.h[i, i] + gos.h[i + 1, i + 1]).real,
+#         "--" + color,
+#         label=r"$\Im{\psi_{" + f"{i // 2}" + r"}}$",
+#     )
+#
+# plt.grid()
+# plt.legend()
 
 
 plt.figure()
@@ -198,6 +225,7 @@ for i in range(0, spas.l):
 
 plt.grid()
 plt.legend()
+
 
 plt.figure()
 plt.title("GHF and RHF basis compared")
