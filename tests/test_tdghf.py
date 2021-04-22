@@ -12,6 +12,52 @@ from gauss_integrator import GaussIntegrator
 from quantum_systems import construct_pyscf_system_ao
 
 
+def test_energy_conservation():
+    molecule = "he 0.0 0.0 0.0"
+
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_ao(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=True,
+        anti_symmetrize=True,
+    )
+
+    ghf = GHF(system, verbose=False).compute_ground_state(
+        tol=1e-12, change_system_basis=True
+    )
+    energy_gs = ghf.compute_energy()
+
+    tdghf = TDGHF(system, verbose=True)
+    r = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
+    r.set_initial_value(ghf.C.ravel())
+
+    dt = 1e-2
+    tfinal = 5
+    num_steps = int(tfinal / dt) + 1
+    time_points = np.linspace(0, tfinal, num_steps)
+
+    energy = np.zeros(num_steps, dtype=np.complex128)
+
+    i = 0
+
+    while r.successful() and r.t < tfinal:
+        assert abs(time_points[i] - r.t) < dt * 0.1
+
+        energy[i] = tdghf.compute_energy(r.t, r.y)
+
+        i += 1
+
+        r.integrate(time_points[i])
+
+    energy[i] = tdghf.compute_energy(r.t, r.y)
+
+    assert np.linalg.norm(energy - energy_gs) < 1e-10
+
+
 def test_helium():
     class sine_square_laser:
         def __init__(self, E0, omega, td, phase=0.0, start=0.0):
