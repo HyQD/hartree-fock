@@ -162,6 +162,25 @@ def test_helium():
         dipole_moment[:, 2].real, test_dip_z.real, atol=1e-6
     )
 
+    tfinal_2 = 10
+    time_points = np.linspace(tfinal, tfinal_2, num_steps)
+    energy = np.zeros(num_steps, dtype=np.complex128)
+
+    i = 0
+
+    while r.successful() and r.t < tfinal_2:
+        assert abs(time_points[i] - r.t) < dt * 0.1
+
+        energy[i] = tdrhf.compute_energy(r.t, r.y)
+
+        i += 1
+
+        r.integrate(time_points[i])
+
+    energy[i] = tdrhf.compute_energy(r.t, r.y)
+
+    assert np.linalg.norm(energy - energy[0]) < 1e-10
+
 
 def test_tdrhf():
     n = 2

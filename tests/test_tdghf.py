@@ -97,8 +97,9 @@ def test_helium():
         anti_symmetrize=True,
     )
 
-    ghf = GHF(system, verbose=False)
-    ghf.compute_ground_state(tol=1e-12, change_system_basis=True)
+    ghf = GHF(system, verbose=False).compute_ground_state(
+        tol=1e-12, change_system_basis=True
+    )
 
     laser_pulse = sine_square_laser(E0=100.0, omega=2.87, td=5, phase=np.pi / 2)
     polarization = np.zeros(3)
@@ -161,6 +162,25 @@ def test_helium():
     np.testing.assert_allclose(
         dipole_moment[:, 2].real, test_dip_z.real, atol=1e-6
     )
+
+    tfinal_2 = 10
+    time_points = np.linspace(tfinal, tfinal_2, num_steps)
+    energy = np.zeros(num_steps, dtype=np.complex128)
+
+    i = 0
+
+    while r.successful() and r.t < tfinal_2:
+        assert abs(time_points[i] - r.t) < dt * 0.1
+
+        energy[i] = tdghf.compute_energy(r.t, r.y)
+
+        i += 1
+
+        r.integrate(time_points[i])
+
+    energy[i] = tdghf.compute_energy(r.t, r.y)
+
+    assert np.linalg.norm(energy - energy[0]) < 1e-10
 
 
 @pytest.mark.skip
