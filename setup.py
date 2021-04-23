@@ -7,6 +7,6 @@ setup(
     install_requires=[
         "numpy",
         "scipy",
-        "quantum-systems @ git+https://github.com/Schoyen/quantum-systems",
+        "quantum-systems @ git+https://github.com/Schoyen/quantum-systems.git",
     ],
 )
