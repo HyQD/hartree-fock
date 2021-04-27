@@ -44,6 +44,6 @@ class TDRHF(TimeDependentHartreeFock):
         F = (
             self.h
             + self.np.einsum("ls,usvl->uv", density_matrix, self.u)
-            - 0.5 * self.np.einsum("ls,usvl->uv", density_matrix, self.u)
+            - 0.5 * self.np.einsum("ls,uslv->uv", density_matrix, self.u)
         )
         return F

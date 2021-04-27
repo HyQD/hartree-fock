@@ -4,12 +4,231 @@ import pytest
 
 from scipy.integrate import complex_ode
 
-from hartree_fock import TDRHF, RHF
+from hartree_fock import TDRHF, RHF, TDGHF
 from quantum_systems import ODQD, GeneralOrbitalSystem
 from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 
 from gauss_integrator import GaussIntegrator
-from quantum_systems import construct_pyscf_system_ao, SpatialOrbitalSystem
+from quantum_systems import (
+    construct_pyscf_system_ao,
+    construct_pyscf_system_rhf,
+    SpatialOrbitalSystem,
+)
+
+
+def test_zero_field():
+
+    molecule = "li 0.0 0.0 0.0; h 0.0 0.0 3.08"
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_ao(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=False,
+        anti_symmetrize=False,
+    )
+
+    """
+    Note: Conservation of the time-dependent dipole moment is sensitive 
+    to the convergence threshold (tol) for the groundstate.
+    """
+    rhf = RHF(system, verbose=False).compute_ground_state(
+        tol=1e-14, change_system_basis=True
+    )
+
+    tdrhf = TDRHF(system, verbose=False)
+
+    C0_rhf = np.complex128(np.eye(system.l))
+    r = complex_ode(tdrhf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
+    r.set_initial_value(C0_rhf.ravel())
+
+    dt = 1e-1
+    tfinal = 10
+    num_steps = int(tfinal / dt) + 1
+    time_points = np.linspace(0, tfinal, num_steps)
+
+    energy_rhf = np.zeros(num_steps, dtype=np.complex128)
+    dipole_moment_rhf = np.zeros(num_steps, dtype=np.complex128)
+    overlap_rhf = np.zeros(num_steps)
+
+    energy_rhf[0] = tdrhf.compute_energy(r.t, r.y.reshape(system.l, system.l))
+
+    dipole_moment_rhf[0] = -tdrhf.compute_one_body_expectation_value(
+        r.t,
+        r.y.reshape(system.l, system.l),
+        system.position[2],
+    )
+
+    overlap_rhf[0] = tdrhf.compute_overlap(
+        r.t, r.y.reshape(system.l, system.l), C0_rhf
+    )
+
+    for i in range(num_steps - 1):
+
+        r.integrate(r.t + dt)
+
+        energy_rhf[i + 1] = tdrhf.compute_energy(
+            r.t, r.y.reshape(system.l, system.l)
+        )
+
+        dipole_moment_rhf[i + 1] = -tdrhf.compute_one_body_expectation_value(
+            r.t,
+            r.y.reshape(system.l, system.l),
+            system.position[2],
+        )
+
+        overlap_rhf[i + 1] = tdrhf.compute_overlap(
+            r.t, r.y.reshape(system.l, system.l), C0_rhf
+        )
+
+    energy_diff = np.max(np.abs(energy_rhf.real - energy_rhf[0].real))
+    dip_mom_diff = np.max(
+        np.abs(dipole_moment_rhf.real - dipole_moment_rhf[0].real)
+    )
+    overlap_diff = np.max(np.abs(overlap_rhf - overlap_rhf[0]))
+
+    assert energy_diff < 1e-9
+    assert dip_mom_diff < 1e-7
+    assert overlap_diff < 1e-9
+
+
+def test_tdrhf_vs_tdghf():
+    class sine_laser:
+        def __init__(self, E0, omega):
+            self.E0 = E0
+            self.omega = omega
+
+        def __call__(self, t):
+            return self.E0 * np.sin(self.omega * t)
+
+    molecule = "li 0.0 0.0 0.0; h 0.0 0.0 3.08"
+    basis = "cc-pvdz"
+
+    system = construct_pyscf_system_rhf(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=False,
+        anti_symmetrize=False,
+    )
+
+    system2 = construct_pyscf_system_rhf(
+        molecule,
+        basis=basis,
+        np=np,
+        verbose=False,
+        add_spin=True,
+        anti_symmetrize=True,
+    )
+
+    tdrhf = TDRHF(system, verbose=True)
+    tdghf = TDGHF(system2, verbose=True)
+
+    C0_rhf = np.complex128(np.eye(system.l))
+    r = complex_ode(tdrhf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
+    r.set_initial_value(C0_rhf.ravel())
+
+    C0_ghf = np.complex128(np.eye(system2.l))
+    r2 = complex_ode(tdghf).set_integrator("GaussIntegrator", s=3, eps=1e-10)
+    r2.set_initial_value(C0_ghf.ravel())
+
+    omega = 0.057
+    t_cycle = 2 * np.pi / omega
+    laser_pulse = sine_laser(E0=0.1, omega=omega)
+    polarization = np.zeros(3)
+    polarization_direction = 2
+    polarization[polarization_direction] = 1
+
+    system.set_time_evolution_operator(
+        DipoleFieldInteraction(laser_pulse, polarization_vector=polarization)
+    )
+
+    system2.set_time_evolution_operator(
+        DipoleFieldInteraction(laser_pulse, polarization_vector=polarization)
+    )
+
+    dt = 1e-1
+    tfinal = 10
+    num_steps = int(tfinal / dt) + 1
+    time_points = np.linspace(0, tfinal, num_steps)
+
+    energy_rhf = np.zeros(num_steps, dtype=np.complex128)
+    dipole_moment_rhf = np.zeros(num_steps, dtype=np.complex128)
+    overlap_rhf = np.zeros(num_steps)
+
+    energy_ghf = np.zeros(num_steps, dtype=np.complex128)
+    dipole_moment_ghf = np.zeros(num_steps, dtype=np.complex128)
+    overlap_ghf = np.zeros(num_steps)
+
+    energy_rhf[0] = tdrhf.compute_energy(r.t, r.y.reshape(system.l, system.l))
+
+    energy_ghf[0] = tdghf.compute_energy(
+        r2.t, r2.y.reshape(system2.l, system2.l)
+    )
+
+    dipole_moment_rhf[0] = -tdrhf.compute_one_body_expectation_value(
+        r.t,
+        r.y.reshape(system.l, system.l),
+        system.position[polarization_direction],
+    )
+
+    dipole_moment_ghf[0] = -tdghf.compute_one_body_expectation_value(
+        r2.t,
+        r2.y.reshape(system2.l, system2.l),
+        system2.position[polarization_direction],
+    )
+
+    overlap_rhf[0] = tdrhf.compute_overlap(
+        r.t, r.y.reshape(system.l, system.l), C0_rhf
+    )
+
+    overlap_ghf[0] = tdghf.compute_overlap(
+        r2.t, r2.y.reshape(system2.l, system2.l), C0_ghf
+    )
+
+    for i in range(num_steps - 1):
+
+        r.integrate(r.t + dt)
+        r2.integrate(r2.t + dt)
+
+        energy_rhf[i + 1] = tdrhf.compute_energy(
+            r.t, r.y.reshape(system.l, system.l)
+        )
+
+        energy_ghf[i + 1] = tdghf.compute_energy(
+            r2.t, r2.y.reshape(system2.l, system2.l)
+        )
+
+        dipole_moment_rhf[i + 1] = -tdrhf.compute_one_body_expectation_value(
+            r.t,
+            r.y.reshape(system.l, system.l),
+            system.position[polarization_direction],
+        )
+
+        dipole_moment_ghf[i + 1] = -tdghf.compute_one_body_expectation_value(
+            r2.t,
+            r2.y.reshape(system2.l, system2.l),
+            system2.position[polarization_direction],
+        )
+
+        overlap_rhf[i + 1] = tdrhf.compute_overlap(
+            r.t, r.y.reshape(system.l, system.l), C0_rhf
+        )
+
+        overlap_ghf[i + 1] = tdghf.compute_overlap(
+            r2.t, r2.y.reshape(system2.l, system2.l), C0_ghf
+        )
+
+    energy_diff = np.linalg.norm(energy_rhf.real - energy_ghf.real)
+    dip_mom_diff = np.linalg.norm(dipole_moment_rhf.real - dipole_moment_ghf)
+    overlap_diff = np.linalg.norm(overlap_rhf - overlap_ghf)
+
+    assert energy_diff < 1e-12
+    assert dip_mom_diff < 1e-12
+    assert overlap_diff < 1e-12
 
 
 def test_energy_conservation():
@@ -266,12 +485,6 @@ def test_tdrhf():
 
     np.testing.assert_allclose(overlap.real, test_overlap[:, 1], atol=1e-3)
 
-    # import matplotlib.pyplot as plt
 
-    # plt.figure()
-    # plt.plot(time_points, overlap, label="TDRHF")
-    # plt.plot(time_points, test_overlap[:, 1].real, label="Test")
-    # plt.grid()
-    # plt.legend()
-
-    # plt.show()
+if __name__ == "__main__":
+    test_zero_field()
