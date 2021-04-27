@@ -94,29 +94,15 @@ class HartreeFock(metaclass=abc.ABCMeta):
     ):
 
         converged = False
-        energy_prev = 1e10
 
         if not "np" in mixer_kwargs:
             mixer_kwargs["np"] = self.np
 
         self.mixer = self.mixer(**mixer_kwargs)
 
+        density_matrix_old = self.density_matrix.copy()
+
         for i in range(1, max_iterations):
-
-            self._total_energy = self._compute_energy(
-                self.density_matrix, self.fock_matrix
-            )
-
-            converged = abs(self._total_energy - energy_prev) < tol
-            if self.verbose:
-                print(
-                    f"converged={converged}, total_energy={self._total_energy},"
-                    + f" iterations={i}"
-                )
-            if converged:
-                break
-
-            energy_prev = self._total_energy
 
             # At convergence f_{ia} = 0, when f is the transformed fock matrix (f in MO basis)
             error_vector = (self._C.conj().T @ self.fock_matrix @ self._C)[
@@ -126,9 +112,31 @@ class HartreeFock(metaclass=abc.ABCMeta):
             f_mixed = self.mixer.compute_new_vector(
                 self.fock_matrix, error_vector
             )
+
             self._epsilon, self._C = self.diagonalize(f_mixed, self.system.s)
             self.density_matrix = self.build_density_matrix(self._C)
             self.fock_matrix = self.build_fock_matrix(self.density_matrix)
+
+            self._total_energy = self._compute_energy(
+                self.density_matrix, self.fock_matrix
+            )
+
+            converged = (
+                self.np.max(
+                    self.np.abs(density_matrix_old - self.density_matrix)
+                )
+                < tol
+            )
+
+            if self.verbose:
+                print(
+                    f"converged={converged}, total_energy={self._total_energy},"
+                    + f" iterations={i}"
+                )
+            if converged:
+                break
+
+            density_matrix_old = self.density_matrix.copy()
 
         if change_system_basis:
             if self.verbose:

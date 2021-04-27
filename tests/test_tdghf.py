@@ -98,7 +98,7 @@ def test_helium():
     )
 
     ghf = GHF(system, verbose=False).compute_ground_state(
-        tol=1e-12, change_system_basis=True
+        tol=1e-6, change_system_basis=True
     )
 
     laser_pulse = sine_square_laser(E0=100.0, omega=2.87, td=5, phase=np.pi / 2)
