@@ -11,7 +11,6 @@ from quantum_systems.time_evolution_operators import DipoleFieldInteraction
 from gauss_integrator import GaussIntegrator
 from quantum_systems import (
     construct_pyscf_system_ao,
-    construct_pyscf_system_rhf,
     SpatialOrbitalSystem,
 )
 
@@ -106,7 +105,7 @@ def test_tdrhf_vs_tdghf():
     molecule = "li 0.0 0.0 0.0; h 0.0 0.0 3.08"
     basis = "cc-pvdz"
 
-    system = construct_pyscf_system_rhf(
+    system = construct_pyscf_system_ao(
         molecule,
         basis=basis,
         np=np,
@@ -114,15 +113,11 @@ def test_tdrhf_vs_tdghf():
         add_spin=False,
         anti_symmetrize=False,
     )
-
-    system2 = construct_pyscf_system_rhf(
-        molecule,
-        basis=basis,
-        np=np,
-        verbose=False,
-        add_spin=True,
-        anti_symmetrize=True,
+    rhf = RHF(system, verbose=False).compute_ground_state(
+        tol=1e-14, change_system_basis=True
     )
+
+    system2 = system.construct_general_orbital_system(anti_symmetrize=True)
 
     tdrhf = TDRHF(system, verbose=True)
     tdghf = TDGHF(system2, verbose=True)
@@ -225,6 +220,10 @@ def test_tdrhf_vs_tdghf():
     energy_diff = np.linalg.norm(energy_rhf.real - energy_ghf.real)
     dip_mom_diff = np.linalg.norm(dipole_moment_rhf.real - dipole_moment_ghf)
     overlap_diff = np.linalg.norm(overlap_rhf - overlap_ghf)
+
+    print(energy_diff)
+    print(dip_mom_diff)
+    print(overlap_diff)
 
     assert energy_diff < 1e-12
     assert dip_mom_diff < 1e-12
@@ -487,4 +486,4 @@ def test_tdrhf():
 
 
 if __name__ == "__main__":
-    test_zero_field()
+    test_tdrhf_vs_tdghf()
