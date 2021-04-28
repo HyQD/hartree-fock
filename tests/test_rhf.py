@@ -26,14 +26,14 @@ def test_rhf():
 
     e_rhf = rhf.total_energy.real
 
-    dip_mom_rhf_x = np.trace(
-        np.dot(rhf.density_matrix, system.dipole_moment[0])
+    dip_mom_rhf_x = rhf.compute_one_body_expectation_value(
+        system.dipole_moment[0]
     ).real
-    dip_mom_rhf_y = np.trace(
-        np.dot(rhf.density_matrix, system.dipole_moment[1])
+    dip_mom_rhf_y = rhf.compute_one_body_expectation_value(
+        system.dipole_moment[1]
     ).real
-    dip_mom_rhf_z = np.trace(
-        np.dot(rhf.density_matrix, system.dipole_moment[2])
+    dip_mom_rhf_z = rhf.compute_one_body_expectation_value(
+        system.dipole_moment[2]
     ).real
 
     import pyscf

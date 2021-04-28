@@ -27,14 +27,14 @@ def test_lih_ghf():
 
     e_ghf = ghf.total_energy.real
 
-    dip_mom_ghf_x = np.trace(
-        np.dot(ghf.density_matrix, system.dipole_moment[0])
+    dip_mom_ghf_x = ghf.compute_one_body_expectation_value(
+        system.dipole_moment[0]
     ).real
-    dip_mom_ghf_y = np.trace(
-        np.dot(ghf.density_matrix, system.dipole_moment[1])
+    dip_mom_ghf_y = ghf.compute_one_body_expectation_value(
+        system.dipole_moment[1]
     ).real
-    dip_mom_ghf_z = np.trace(
-        np.dot(ghf.density_matrix, system.dipole_moment[2])
+    dip_mom_ghf_z = ghf.compute_one_body_expectation_value(
+        system.dipole_moment[2]
     ).real
 
     import pyscf

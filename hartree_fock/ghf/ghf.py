@@ -17,3 +17,6 @@ class GHF(HartreeFock):
         e_ghf = self.np.trace(self.np.dot(P, self.system.h))
         e_ghf += self.np.trace(self.np.dot(P, F))
         return 0.5 * e_ghf + self.system.nuclear_repulsion_energy
+
+    def compute_one_body_expectation_value(self, mat):
+        return super().compute_one_body_expectation_value(mat)
