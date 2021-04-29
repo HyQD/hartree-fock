@@ -21,3 +21,11 @@ class RHF(HartreeFock):
 
     def compute_one_body_expectation_value(self, mat):
         return super().compute_one_body_expectation_value(mat)
+
+    def compute_two_body_expectation_value(self, op):
+        density_matrix = self.compute_one_body_density_matrix()
+
+        exp_val = self.np.einsum("ls, usvl -> uv", density_matrix, op)
+        exp_val -= 0.5 * self.np.einsum("ls, uslv -> uv", density_matrix, op)
+
+        return self.np.trace(self.np.dot(density_matrix, exp_val))
