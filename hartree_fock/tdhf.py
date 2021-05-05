@@ -20,9 +20,9 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
     def compute_energy(self, current_time, C):
         pass
 
-    @abc.abstractmethod
     def compute_one_body_expectation_value(self, current_time, C, mat):
-        pass
+        D = self.compute_one_body_density_matrix(current_time, C)
+        return self.np.trace(self.np.dot(D, mat))
 
     @abc.abstractmethod
     def compute_one_body_density_matrix(self, current_time, C):

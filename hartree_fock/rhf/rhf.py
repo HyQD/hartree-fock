@@ -19,8 +19,6 @@ class RHF(HartreeFock):
         e_rhf += self.np.trace(self.np.dot(P, F))
         return 0.5 * e_rhf + self.system.nuclear_repulsion_energy
 
-    def compute_one_body_expectation_value(self, mat):
-        return super().compute_one_body_expectation_value(mat)
 
     def compute_two_body_expectation_value(self, op):
         density_matrix = self.compute_one_body_density_matrix()

@@ -74,7 +74,6 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
         return self.system.compute_particle_density(rho_qp)
 
-    @abc.abstractmethod
     def compute_one_body_expectation_value(self, mat):
         D = self.compute_one_body_density_matrix()
         return self.np.trace(self.np.dot(D, mat))

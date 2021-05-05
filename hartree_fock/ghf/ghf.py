@@ -26,9 +26,6 @@ class GHF(HartreeFock):
 
         return rho_rspq
 
-    def compute_one_body_expectation_value(self, mat):
-        return super().compute_one_body_expectation_value(mat)
-
     def compute_two_body_expectation_value(self, op, asym=True):
         rho_rspq = self.compute_two_body_density_matrix()
 

@@ -16,10 +16,6 @@ class TDRHF(TimeDependentHartreeFock):
 
         return 0.5 * energy + self.system.nuclear_repulsion_energy
 
-    def compute_one_body_expectation_value(self, current_time, C, mat):
-        D = self.compute_one_body_density_matrix(current_time, C)
-        return self.np.trace(self.np.dot(D, mat))
-
     def compute_one_body_density_matrix(self, current_time, C):
         C = C.reshape(self.system.l, self.system.l)
 
