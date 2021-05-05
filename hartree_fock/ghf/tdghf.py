@@ -25,6 +25,21 @@ class TDGHF(TimeDependentHartreeFock):
 
         return self.build_density_matrix(C)
 
+    def compute_two_body_density_matrix(self, current_time, C):
+        rho_qp = self.compute_one_body_density_matrix(current_time, C)
+        rho_rspq = -self.np.einsum(
+            "sp, rq -> rspq", rho_qp, rho_qp
+        ) + self.np.einsum("rp, sq -> rspq", rho_qp, rho_qp)
+
+        return rho_rspq
+
+    def compute_two_body_expectation_value(
+        self, current_time, C, op, asym=True
+    ):
+        return (
+            0.5 if asym else 1
+        ) * super().compute_two_body_expectation_value(current_time, C, op)
+
     def compute_overlap(self, current_time, C_a, C_b):
         C_a = C_a.reshape(self.system.l, self.system.l)
         C_b = C_b.reshape(self.system.l, self.system.l)

@@ -21,6 +21,15 @@ class TDRHF(TimeDependentHartreeFock):
 
         return self.build_density_matrix(C)
 
+    def compute_two_body_density_matrix(self, current_time, C):
+        rho_qp = self.compute_one_body_density_matrix(current_time, C)
+
+        rho_rspq = self.np.einsum(
+            "rp, sq -> rspq", rho_qp, rho_qp
+        ) - 0.5 * self.np.einsum("sp, rq -> rspq", rho_qp, rho_qp)
+
+        return rho_rspq
+
     def compute_overlap(self, current_time, C_a, C_b):
         C_a = C_a.reshape(self.system.l, self.system.l)
         C_b = C_b.reshape(self.system.l, self.system.l)

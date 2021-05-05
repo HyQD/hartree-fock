@@ -24,8 +24,17 @@ class TimeDependentHartreeFock(metaclass=abc.ABCMeta):
         D = self.compute_one_body_density_matrix(current_time, C)
         return self.np.trace(self.np.dot(D, mat))
 
+    def compute_two_body_expectation_value(self, current_time, C, op):
+        rho_rspq = self.compute_two_body_density_matrix(current_time, C)
+
+        return 0.5 * self.np.einsum("pqrs, rspq ->", op, rho_rspq)
+
     @abc.abstractmethod
     def compute_one_body_density_matrix(self, current_time, C):
+        pass
+
+    @abc.abstractmethod
+    def compute_two_body_density_matrix(self):
         pass
 
     def compute_particle_density(self, current_time, C):

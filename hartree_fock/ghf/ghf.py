@@ -27,10 +27,6 @@ class GHF(HartreeFock):
         return rho_rspq
 
     def compute_two_body_expectation_value(self, op, asym=True):
-        rho_rspq = self.compute_two_body_density_matrix()
-
         return (
-            0.5
-            * (0.5 if asym else 1)
-            * self.np.einsum("pqrs, rspq ->", op, rho_rspq)
-        )
+            0.5 if asym else 1
+        ) * super().compute_two_body_expectation_value(op)
