@@ -22,10 +22,43 @@ def test_lih_ghf():
         anti_symmetrize=True,
     )
 
-    ghf = GHF(system, verbose=False)
-    ghf.compute_ground_state(tol=1e-12, change_system_basis=False)
+    ghf = GHF(system, verbose=False).compute_ground_state(
+        tol=1e-12, change_system_basis=False
+    )
 
     e_ghf = ghf.total_energy.real
+
+    e_ghf_2 = (
+        ghf.compute_one_body_expectation_value(system.h)
+        + ghf.compute_two_body_expectation_value(system.u)
+        + system.nuclear_repulsion_energy
+    ).real
+
+    assert abs(e_ghf - e_ghf_2) < 1e-12
+
+    rho_qp = ghf.compute_one_body_density_matrix()
+    rho_rspq = ghf.compute_two_body_density_matrix()
+    # rho_qp_hf = system.transform_one_body_elements(rho_qp, C=ghf.C.conj())
+    # rho_rspq_hf = system.transform_two_body_elements(rho_rspq, C=ghf.C.conj())
+    # rho_man = np.einsum("ai, bi -> ba", ghf.C[:, system.o].conj(), ghf.C[:, system.o])
+    # np.testing.assert_allclose(rho_qp, rho_man)
+    # print(np.dot(ghf.C[:, system.o].conj().T, ghf.C))
+    # rho_qp_hf = np.einsum("ba, ar, bs -> sr", rho_qp, ghf.C, ghf.C.conj())
+    # print(rho_qp_hf)
+    # rho_rspq_hf = system.transform_two_body_elements(rho_rspq, C=ghf.C.conj())
+    # print(system.n)
+    # print(system.n * (system.n - 1))
+    # print(np.trace(rho_qp).real)
+    # print(np.trace(np.trace(rho_rspq, axis1=0, axis2=2)).real)
+    # print(np.trace(rho_qp_hf).real)
+    # print(np.trace(np.trace(rho_rspq_hf, axis1=0, axis2=2)).real)
+    # assert False
+
+    e_ghf_3 = np.trace(np.dot(system.h, rho_qp))
+    e_ghf_3 += 0.25 * np.einsum("pqrs, rspq ->", system.u, rho_rspq)
+    e_ghf_3 += system.nuclear_repulsion_energy
+
+    assert abs(e_ghf - e_ghf_3.real) < 1e-12
 
     dip_mom_ghf_x = ghf.compute_one_body_expectation_value(
         system.dipole_moment[0]
@@ -80,11 +113,18 @@ def test_h2o_ghf():
         anti_symmetrize=True,
     )
 
-    ghf = GHF(system, verbose=True)
-    ghf.compute_ground_state(tol=1e-12)
+    ghf = GHF(system, verbose=True).compute_ground_state(tol=1e-12)
+
+    e_ghf = ghf.compute_energy().real
+    e_ghf_2 = (
+        ghf.compute_one_body_expectation_value(system.h)
+        + ghf.compute_two_body_expectation_value(system.u)
+        + system.nuclear_repulsion_energy
+    ).real
     e_hf_pyscf = -74.965_900_173_175_2
 
-    assert abs(ghf.total_energy - e_hf_pyscf) < 1e-10
+    assert abs(e_ghf - e_ghf_2) < 1e-12
+    assert abs(e_ghf - e_hf_pyscf) < 1e-10
 
 
 def test_h2_hf():
@@ -132,9 +172,7 @@ def test_tdho_hf():
         2, TwoDimensionalHarmonicOscillator(l // 2, radius, num_grid_points)
     )
 
-    hf = GHF(tdho, verbose=True)
-
-    hf.compute_ground_state(tol=1e-10)  # , num_vecs=20, max_iterations=1000)
+    hf = GHF(tdho, verbose=True).compute_ground_state(tol=1e-10)
 
     assert abs(hf.compute_energy() - 3.162_691) < 1e-6
 

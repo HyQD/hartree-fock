@@ -49,11 +49,27 @@ def test_energy_conservation():
 
         energy[i] = tdghf.compute_energy(r.t, r.y)
 
+        energy_trace = (
+            tdghf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+            + tdghf.compute_two_body_expectation_value(
+                r.t, r.y, system.u_t(r.t)
+            )
+            + system.nuclear_repulsion_energy
+        )
+        assert abs(energy_trace - energy[i]) < 1e-12
+
         i += 1
 
         r.integrate(time_points[i])
 
     energy[i] = tdghf.compute_energy(r.t, r.y)
+
+    energy_trace = (
+        tdghf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+        + tdghf.compute_two_body_expectation_value(r.t, r.y, system.u_t(r.t))
+        + system.nuclear_repulsion_energy
+    )
+    assert abs(energy_trace - energy[i]) < 1e-12
 
     assert np.linalg.norm(energy - energy_gs) < 1e-10
 
@@ -137,6 +153,15 @@ def test_helium():
                 r.t, r.y, system.dipole_moment[j]
             )
 
+        energy_trace = (
+            tdghf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+            + tdghf.compute_two_body_expectation_value(
+                r.t, r.y, system.u_t(r.t)
+            )
+            + system.nuclear_repulsion_energy
+        )
+        assert abs(energy_trace - energy[i]) < 1e-12
+
         i += 1
 
         r.integrate(time_points[i])
@@ -148,6 +173,13 @@ def test_helium():
         dipole_moment[i, j] = tdghf.compute_one_body_expectation_value(
             r.t, r.y, system.dipole_moment[j]
         )
+
+    energy_trace = (
+        tdghf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+        + tdghf.compute_two_body_expectation_value(r.t, r.y, system.u_t(r.t))
+        + system.nuclear_repulsion_energy
+    )
+    assert abs(energy_trace - energy[i]) < 1e-12
 
     test_energy = np.load(
         os.path.join("tests", "dat", "tdghf_helium_energy.npy")
@@ -174,11 +206,27 @@ def test_helium():
 
         energy[i] = tdghf.compute_energy(r.t, r.y)
 
+        energy_trace = (
+            tdghf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+            + tdghf.compute_two_body_expectation_value(
+                r.t, r.y, system.u_t(r.t)
+            )
+            + system.nuclear_repulsion_energy
+        )
+        assert abs(energy_trace - energy[i]) < 1e-12
+
         i += 1
 
         r.integrate(time_points[i])
 
     energy[i] = tdghf.compute_energy(r.t, r.y)
+
+    energy_trace = (
+        tdghf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+        + tdghf.compute_two_body_expectation_value(r.t, r.y, system.u_t(r.t))
+        + system.nuclear_repulsion_energy
+    )
+    assert abs(energy_trace - energy[i]) < 1e-12
 
     assert np.linalg.norm(energy - energy[0]) < 1e-10
 
