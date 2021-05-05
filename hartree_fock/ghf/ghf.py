@@ -2,6 +2,13 @@ from hartree_fock.hf import HartreeFock
 
 
 class GHF(HartreeFock):
+    """General Hartree-Fock solver class
+
+    See Also
+    --------
+    hartree_fock.hf.HartreeFock
+    """
+
     def build_density_matrix(self, C):
         P = self.np.einsum(
             "ui,vi->uv", C[:, self.system.o], C[:, self.system.o].conj()
