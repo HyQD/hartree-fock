@@ -189,7 +189,7 @@ def test_helium():
     )
     test_dip_z = np.load(os.path.join("tests", "dat", "tdghf_helium_dip_z.npy"))
 
-    np.testing.assert_allclose(energy.real, test_energy.real, atol=1e-6)
+    np.testing.assert_allclose(energy.real, test_energy.real, atol=1e-5)
     np.testing.assert_allclose(overlap, test_overlap, atol=1e-6)
     np.testing.assert_allclose(
         dipole_moment[:, 2].real, test_dip_z.real, atol=1e-6
