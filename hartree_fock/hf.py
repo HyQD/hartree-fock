@@ -52,6 +52,10 @@ class HartreeFock(metaclass=abc.ABCMeta):
     def compute_one_body_density_matrix(self):
         return self.build_density_matrix(self._C)
 
+    @abc.abstractmethod
+    def compute_two_body_density_matrix(self):
+        pass
+
     def compute_particle_density(self):
         """Computes one-particle density
         Returns
@@ -70,10 +74,13 @@ class HartreeFock(metaclass=abc.ABCMeta):
 
         return self.system.compute_particle_density(rho_qp)
 
-    @abc.abstractmethod
     def compute_one_body_expectation_value(self, mat):
         D = self.compute_one_body_density_matrix()
         return self.np.trace(self.np.dot(D, mat))
+
+    def compute_two_body_expectation_value(self, op):
+        rho_rspq = self.compute_two_body_density_matrix()
+        return 0.5 * self.np.einsum("pqrs, rspq ->", op, rho_rspq)
 
     @abc.abstractmethod
     def build_density_matrix(self, C):
