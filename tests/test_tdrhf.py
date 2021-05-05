@@ -30,7 +30,7 @@ def test_zero_field():
     )
 
     """
-    Note: Conservation of the time-dependent dipole moment is sensitive 
+    Note: Conservation of the time-dependent dipole moment is sensitive
     to the convergence threshold (tol) for the groundstate.
     """
     rhf = RHF(system, verbose=False).compute_ground_state(
@@ -52,35 +52,47 @@ def test_zero_field():
     dipole_moment_rhf = np.zeros(num_steps, dtype=np.complex128)
     overlap_rhf = np.zeros(num_steps)
 
-    energy_rhf[0] = tdrhf.compute_energy(r.t, r.y.reshape(system.l, system.l))
+    energy_rhf[0] = tdrhf.compute_energy(r.t, r.y)
+
+    energy_trace = (
+        tdrhf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+        + tdrhf.compute_two_body_expectation_value(r.t, r.y, system.u_t(r.t))
+        + system.nuclear_repulsion_energy
+    )
+
+    assert abs(energy_rhf[0] - energy_trace) < 1e-12
 
     dipole_moment_rhf[0] = -tdrhf.compute_one_body_expectation_value(
         r.t,
-        r.y.reshape(system.l, system.l),
+        r.y,
         system.position[2],
     )
 
-    overlap_rhf[0] = tdrhf.compute_overlap(
-        r.t, r.y.reshape(system.l, system.l), C0_rhf
-    )
+    overlap_rhf[0] = tdrhf.compute_overlap(r.t, r.y, C0_rhf)
 
     for i in range(num_steps - 1):
 
         r.integrate(r.t + dt)
 
-        energy_rhf[i + 1] = tdrhf.compute_energy(
-            r.t, r.y.reshape(system.l, system.l)
-        )
+        energy_rhf[i + 1] = tdrhf.compute_energy(r.t, r.y)
 
         dipole_moment_rhf[i + 1] = -tdrhf.compute_one_body_expectation_value(
             r.t,
-            r.y.reshape(system.l, system.l),
+            r.y,
             system.position[2],
         )
 
-        overlap_rhf[i + 1] = tdrhf.compute_overlap(
-            r.t, r.y.reshape(system.l, system.l), C0_rhf
+        overlap_rhf[i + 1] = tdrhf.compute_overlap(r.t, r.y, C0_rhf)
+
+        energy_trace = (
+            tdrhf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+            + tdrhf.compute_two_body_expectation_value(
+                r.t, r.y, system.u_t(r.t)
+            )
+            + system.nuclear_repulsion_energy
         )
+
+        assert abs(energy_rhf[i + 1] - energy_trace) < 1e-12
 
     energy_diff = np.max(np.abs(energy_rhf.real - energy_rhf[0].real))
     dip_mom_diff = np.max(
@@ -158,64 +170,50 @@ def test_tdrhf_vs_tdghf():
     dipole_moment_ghf = np.zeros(num_steps, dtype=np.complex128)
     overlap_ghf = np.zeros(num_steps)
 
-    energy_rhf[0] = tdrhf.compute_energy(r.t, r.y.reshape(system.l, system.l))
+    energy_rhf[0] = tdrhf.compute_energy(r.t, r.y)
 
-    energy_ghf[0] = tdghf.compute_energy(
-        r2.t, r2.y.reshape(system2.l, system2.l)
-    )
+    energy_ghf[0] = tdghf.compute_energy(r2.t, r2.y)
 
     dipole_moment_rhf[0] = -tdrhf.compute_one_body_expectation_value(
         r.t,
-        r.y.reshape(system.l, system.l),
+        r.y,
         system.position[polarization_direction],
     )
 
     dipole_moment_ghf[0] = -tdghf.compute_one_body_expectation_value(
         r2.t,
-        r2.y.reshape(system2.l, system2.l),
+        r2.y,
         system2.position[polarization_direction],
     )
 
-    overlap_rhf[0] = tdrhf.compute_overlap(
-        r.t, r.y.reshape(system.l, system.l), C0_rhf
-    )
+    overlap_rhf[0] = tdrhf.compute_overlap(r.t, r.y, C0_rhf)
 
-    overlap_ghf[0] = tdghf.compute_overlap(
-        r2.t, r2.y.reshape(system2.l, system2.l), C0_ghf
-    )
+    overlap_ghf[0] = tdghf.compute_overlap(r2.t, r2.y, C0_ghf)
 
     for i in range(num_steps - 1):
 
         r.integrate(r.t + dt)
         r2.integrate(r2.t + dt)
 
-        energy_rhf[i + 1] = tdrhf.compute_energy(
-            r.t, r.y.reshape(system.l, system.l)
-        )
+        energy_rhf[i + 1] = tdrhf.compute_energy(r.t, r.y)
 
-        energy_ghf[i + 1] = tdghf.compute_energy(
-            r2.t, r2.y.reshape(system2.l, system2.l)
-        )
+        energy_ghf[i + 1] = tdghf.compute_energy(r2.t, r2.y)
 
         dipole_moment_rhf[i + 1] = -tdrhf.compute_one_body_expectation_value(
             r.t,
-            r.y.reshape(system.l, system.l),
+            r.y,
             system.position[polarization_direction],
         )
 
         dipole_moment_ghf[i + 1] = -tdghf.compute_one_body_expectation_value(
             r2.t,
-            r2.y.reshape(system2.l, system2.l),
+            r2.y,
             system2.position[polarization_direction],
         )
 
-        overlap_rhf[i + 1] = tdrhf.compute_overlap(
-            r.t, r.y.reshape(system.l, system.l), C0_rhf
-        )
+        overlap_rhf[i + 1] = tdrhf.compute_overlap(r.t, r.y, C0_rhf)
 
-        overlap_ghf[i + 1] = tdghf.compute_overlap(
-            r2.t, r2.y.reshape(system2.l, system2.l), C0_ghf
-        )
+        overlap_ghf[i + 1] = tdghf.compute_overlap(r2.t, r2.y, C0_ghf)
 
     energy_diff = np.linalg.norm(energy_rhf.real - energy_ghf.real)
     dip_mom_diff = np.linalg.norm(dipole_moment_rhf.real - dipole_moment_ghf)
@@ -339,39 +337,51 @@ def test_helium():
     overlap = np.zeros(num_steps)
     dipole_moment = np.zeros((num_steps, 3), dtype=np.complex128)
 
-    energy[0] = tdrhf.compute_energy(0, r.y.reshape(system.l, system.l))
-    overlap[0] = tdrhf.compute_overlap(
-        0, r.y.reshape(system.l, system.l), rhf.C
+    energy[0] = tdrhf.compute_energy(0, r.y)
+    overlap[0] = tdrhf.compute_overlap(0, r.y, rhf.C)
+
+    energy_trace = (
+        tdrhf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+        + tdrhf.compute_two_body_expectation_value(r.t, r.y, system.u_t(r.t))
+        + system.nuclear_repulsion_energy
     )
+
+    assert abs(energy[0] - energy_trace) < 1e-12
 
     for j in range(3):
         dipole_moment[0, j] = -tdrhf.compute_one_body_expectation_value(
-            0, r.y.reshape(system.l, system.l), system.position[j]
+            0, r.y, system.position[j]
         )
 
     for i in range(num_steps - 1):
 
         r.integrate(r.t + dt)
 
-        energy[i + 1] = tdrhf.compute_energy(
-            r.t + dt, r.y.reshape(system.l, system.l)
-        )
+        energy[i + 1] = tdrhf.compute_energy(r.t, r.y)
 
-        overlap[i + 1] = tdrhf.compute_overlap(
-            r.t + dt, r.y.reshape(system.l, system.l), rhf.C
-        )
+        overlap[i + 1] = tdrhf.compute_overlap(r.t, r.y, rhf.C)
 
         for j in range(3):
             dipole_moment[i + 1, j] = -tdrhf.compute_one_body_expectation_value(
-                r.t + dt, r.y.reshape(system.l, system.l), system.position[j]
+                r.t, r.y, system.position[j]
             )
 
+        energy_trace = (
+            tdrhf.compute_one_body_expectation_value(r.t, r.y, system.h_t(r.t))
+            + tdrhf.compute_two_body_expectation_value(
+                r.t, r.y, system.u_t(r.t)
+            )
+            + system.nuclear_repulsion_energy
+        )
+
+        assert abs(energy[i + 1] - energy_trace) < 1e-12
+
     test_overlap = np.load(
-        os.path.join("tests", "dat", "tdrhf_helium_overlap.npy")
+        os.path.join("tests", "dat", "tdghf_helium_overlap.npy")
     )
-    test_dip_z = np.load(os.path.join("tests", "dat", "tdrhf_helium_dip_z.npy"))
+    test_dip_z = np.load(os.path.join("tests", "dat", "tdghf_helium_dip_z.npy"))
     test_energy = np.load(
-        os.path.join("tests", "dat", "tdrhf_helium_energy.npy")
+        os.path.join("tests", "dat", "tdghf_helium_energy.npy")
     )
 
     np.testing.assert_allclose(energy.real, test_energy.real, atol=1e-5)
